@@ -47,7 +47,7 @@
 <body>
 
 <!-- Control Button -->
-<button id="toggle-btn">Extension: Enabled</button>
+<button id="toggle-btn">Span: Enabled</button>
 
 <script type="importmap">
     {
@@ -124,7 +124,7 @@
         const btn = document.getElementById('toggle-btn');
         btn.addEventListener('click', () => {
             canExtend = !canExtend;
-            btn.textContent = canExtend ? "Extension: Enabled" : "Extension: Disabled";
+            btn.textContent = canExtend ? "Span: Enabled" : "Span: Disabled";
             btn.classList.toggle('disabled', !canExtend);
         });
 
