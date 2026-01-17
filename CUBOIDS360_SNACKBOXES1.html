@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Snack Boxes - Height Restricted</title>
+    <style>
+        body { 
+            margin: 0; 
+            padding: 0;
+            overflow: hidden; 
+            background-color: #fdfaf0; 
+            display: flex; 
+            touch-action: none; 
+            height: 100vh; 
+            width: 100vw;
+        }
+        .container {
+            flex: 1;
+            position: relative;
+            outline: 1px solid #e0dacc;
+        }
+        canvas { display: block; width: 100% !important; height: 100% !important; }
+    </style>
+</head>
+<body>
+
+<div id="leftView" class="container"></div>
+<div id="rightView" class="container"></div>
+
+<script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+</script>
+
+<script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    class SnackBoxInstance {
+        constructor(containerId, initialSize, maxHeight) {
+            this.container = document.getElementById(containerId);
+            this.size = initialSize; 
+            this.maxHeight = maxHeight;
+            this.handles = [];
+            this.isDraggingHandle = false;
+            this.activeHandle = null;
+            this.sandwichGroup = new THREE.Group();
+            
+            this.init();
+        }
+
+        init() {
+            // 1. Scene & Renderer
+            this.scene = new THREE.Scene();
+            this.scene.background = new THREE.Color(0xfdfaf0);
+
+            this.camera = new THREE.PerspectiveCamera(45, this.container.clientWidth / this.container.clientHeight, 0.1, 1000);
+            this.camera.position.set(7, 5, 9);
+
+            this.renderer = new THREE.WebGLRenderer({ antialias: true });
+            this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+            this.renderer.setPixelRatio(window.devicePixelRatio);
+            this.container.appendChild(this.renderer.domElement);
+
+            // 2. Lighting
+            const light = new THREE.DirectionalLight(0xffffff, 1.2);
+            light.position.set(5, 10, 7);
+            this.scene.add(light);
+            this.scene.add(new THREE.AmbientLight(0xfff5e6, 0.8));
+
+            // 3. The Tray Mesh
+            const boxMat = new THREE.MeshPhongMaterial({ 
+                color: 0xd2b48c, 
+                side: THREE.BackSide,
+                transparent: true,
+                opacity: 0.8
+            });
+            this.tray = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), boxMat);
+            this.scene.add(this.tray);
+
+            // 4. Sandwich Container
+            this.scene.add(this.sandwichGroup);
+
+            this.createHandles();
+            this.updateCuboid();
+
+            // 5. Controls
+            this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+            this.controls.enableDamping = true;
+            this.controls.dampingFactor = 0.07;
+
+            // 6. Raycasting
+            this.raycaster = new THREE.Raycaster();
+            this.pointer = new THREE.Vector2();
+
+            // 7. Events
+            this.renderer.domElement.addEventListener('pointerdown', (e) => this.onPointerDown(e));
+            window.addEventListener('pointermove', (e) => this.onPointerMove(e));
+            window.addEventListener('pointerup', () => this.onPointerUp());
+        }
+
+        createHandles() {
+            const handleGeo = new THREE.SphereGeometry(0.5); // Large hit area
+            const handleMat = new THREE.MeshBasicMaterial({ 
+                visible: false 
+            });
+
+            const corners = [
+                [1,1,1], [1,1,-1], [1,-1,1], [1,-1,-1],
+                [-1,1,1], [-1,1,-1], [-1,-1,1], [-1,-1,-1]
+            ];
+
+            corners.forEach(dir => {
+                const handle = new THREE.Mesh(handleGeo, handleMat);
+                handle.userData = { dir: new THREE.Vector3(...dir) };
+                this.scene.add(handle);
+                this.handles.push(handle);
+            });
+        }
+
+        updateCuboid() {
+            this.tray.scale.set(this.size.x + 0.1, this.size.y + 0.1, this.size.z + 0.1);
+
+            while(this.sandwichGroup.children.length > 0) this.sandwichGroup.remove(this.sandwichGroup.children[0]);
+
+            const breadMat = new THREE.MeshPhongMaterial({ color: 0xe3c18d }); 
+            const fillingMat = new THREE.MeshPhongMaterial({ color: 0x6ab04c }); 
+            
+            const pieceGeo = new THREE.BoxGeometry(0.95, 0.95, 0.95);
+            const fillingGeo = new THREE.BoxGeometry(0.96, 0.1, 0.96);
+
+            for(let x = 0; x < this.size.x; x++) {
+                for(let y = 0; y < this.size.y; y++) {
+                    for(let z = 0; z < this.size.z; z++) {
+                        const sGroup = new THREE.Group();
+                        const bread = new THREE.Mesh(pieceGeo, breadMat);
+                        sGroup.add(bread);
+                        const filling = new THREE.Mesh(fillingGeo, fillingMat);
+                        sGroup.add(filling);
+
+                        sGroup.position.set(
+                            x - (this.size.x - 1) / 2,
+                            y - (this.size.y - 1) / 2,
+                            z - (this.size.z - 1) / 2
+                        );
+                        this.sandwichGroup.add(sGroup);
+                    }
+                }
+            }
+
+            const hX = this.size.x / 2, hY = this.size.y / 2, hZ = this.size.z / 2;
+            this.handles.forEach(h => {
+                const d = h.userData.dir;
+                h.position.set(hX * d.x, hY * d.y, hZ * d.z);
+            });
+        }
+
+        onPointerDown(event) {
+            const rect = this.container.getBoundingClientRect();
+            this.pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            this.pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+            this.raycaster.setFromCamera(this.pointer, this.camera);
+            const intersects = this.raycaster.intersectObjects(this.handles);
+
+            if (intersects.length > 0) {
+                this.isDraggingHandle = true;
+                this.activeHandle = intersects[0].object;
+                this.controls.enabled = false; 
+            } else {
+                this.isDraggingHandle = false;
+                this.controls.enabled = true;
+            }
+        }
+
+        onPointerMove(event) {
+            if (!this.isDraggingHandle || !this.activeHandle) return;
+
+            const rect = this.container.getBoundingClientRect();
+            this.pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            this.pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+            this.raycaster.setFromCamera(this.pointer, this.camera);
+            const plane = new THREE.Plane();
+            plane.setFromNormalAndCoplanarPoint(this.camera.getWorldDirection(new THREE.Vector3()), this.activeHandle.position);
+
+            const intersectPoint = new THREE.Vector3();
+            if (this.raycaster.ray.intersectPlane(plane, intersectPoint)) {
+                // Constraints: nx and nz are fixed to initial base dimensions.
+                // Only ny (height) is calculated from the dragging movement.
+                const ny = Math.max(1, Math.min(this.maxHeight, Math.round(Math.abs(intersectPoint.y) * 2)));
+
+                if (ny !== this.size.y) {
+                    this.size.y = ny;
+                    this.updateCuboid();
+                }
+            }
+        }
+
+        onPointerUp() {
+            this.isDraggingHandle = false;
+            this.activeHandle = null;
+            this.controls.enabled = true; 
+        }
+
+        handleResize() {
+            this.camera.aspect = this.container.clientWidth / this.container.clientHeight;
+            this.camera.updateProjectionMatrix();
+            this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+        }
+
+        render() {
+            this.controls.update();
+            this.renderer.render(this.scene, this.camera);
+        }
+    }
+
+    // Left Box: Fixed Base 4x2, maxHeight 2
+    const boxLeft = new SnackBoxInstance('leftView', { x: 4, y: 1, z: 2 }, 2);
+    
+    // Right Box: Fixed Base 3x2, maxHeight 3
+    const boxRight = new SnackBoxInstance('rightView', { x: 3, y: 1, z: 2 }, 3);
+
+    function animate() {
+        requestAnimationFrame(animate);
+        boxLeft.render();
+        boxRight.render();
+    }
+
+    window.addEventListener('resize', () => {
+        boxLeft.handleResize();
+        boxRight.handleResize();
+    });
+
+    animate();
+</script>
+</body>
+</html>
