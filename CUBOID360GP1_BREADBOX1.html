@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -12,7 +13,10 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             touch-action: none;
         }
-        canvas { display: block; }
+
+        canvas {
+            display: block;
+        }
 
         #main-header {
             position: absolute;
@@ -49,6 +53,23 @@
             color: #4e342e;
             font-weight: 500;
         }
+
+        /* Fixed QR code styling */
+        #qr-display {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 150px;
+            /* Slightly larger for visibility */
+            height: auto;
+            background: white;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            /* Ensure it stays on top of everything */
+        }
     </style>
 </head>
 
@@ -64,14 +85,18 @@
         <div class="pointer-item">• What does the number of unit cubes in each layer represent?</div>
         <div class="pointer-item">• What does the number of layers represent?</div>
         <div class="pointer-item">• What does the total number of unit cubes in all the layers together represent?</div>
-        <div class="pointer-item">• What do you obtain when you divide the volume of the cuboid by the surface area of its base layer?</div>
+        <div class="pointer-item">• What do you obtain when you divide the volume of the cuboid by the surface area of
+            its base layer?</div>
         <div class="pointer-item">• What do you obtain when you divide the volume of the cuboid by its height?</div>
-        
-        <!-- THE CORRECTED LINE -->
-        <div style="margin-top: 15px; color: #757575; font-style: italic; border-top: 1px solid #eee; padding-top: 10px; font-size: 14px;">
+
+        <div
+            style="margin-top: 15px; color: #757575; font-style: italic; border-top: 1px solid #eee; padding-top: 10px; font-size: 14px;">
             Use hand gestures to rotate and span the cuboid while exploring these concepts
         </div>
     </div>
+
+    <!-- THE QR CODE -->
+    <img id="qr-display" src="breadboxqr.png" alt="Scan to explore">
 
     <script type="importmap">
     {
@@ -145,7 +170,7 @@
         function createHandles() {
             const handleGeo = new THREE.SphereGeometry(0.5);
             const handleMat = new THREE.MeshBasicMaterial({ visible: false });
-            const corners = [[1,1,1],[1,1,-1],[1,-1,1],[1,-1,-1],[-1,1,1],[-1,1,-1],[-1,-1,1],[-1,-1,-1]];
+            const corners = [[1, 1, 1], [1, 1, -1], [1, -1, 1], [1, -1, -1], [-1, 1, 1], [-1, 1, -1], [-1, -1, 1], [-1, -1, -1]];
             corners.forEach(dir => {
                 const handle = new THREE.Mesh(handleGeo, handleMat);
                 handle.userData = { dir: new THREE.Vector3(...dir) };
@@ -187,6 +212,9 @@
         }
 
         function onPointerDown(e) {
+            // Check if clicking QR code to allow saving it
+            if (e.target.id === 'qr-display') return;
+
             pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
             pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
             raycaster.setFromCamera(pointer, camera);
@@ -213,4 +241,5 @@
         function animate() { requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); }
     </script>
 </body>
+
 </html>
