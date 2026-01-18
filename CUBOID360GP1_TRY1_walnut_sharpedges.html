@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>3D Walnut Packet - Minimalist UI</title>
+    <title>3D Walnut Packet - Curvy Shadow UI</title>
     <style>
         body {
             margin: 0;
@@ -18,33 +18,37 @@
             display: block;
         }
 
-        /* --- UPDATED UI: NO BACKGROUND, SIDE PANEL ONLY --- */
+        /* --- UPDATED UI: CURVY CORNERS + SHADOW + SIDE PANEL --- */
         #ui-container {
             position: absolute;
             top: 20px;
             left: 20px;
             max-width: 500px;
-            /* Background removed */
-            background: transparent;
-            padding: 10px 0 10px 25px;
-            /* Spacing adjusted for transparency */
+            /* Semi-transparent white background to host the shadow */
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px 25px;
             pointer-events: none;
             z-index: 10;
+
+            /* Curvy Corners */
+            border-radius: 15px;
+
             /* The required Side Panel (Deep Walnut Brown) */
             border-left: 6px solid #5d4037;
+
+            /* Shadow Design exactly as in Breadbox */
+            box-shadow: 2px 2px 15px rgba(0, 0, 0, 0.08);
             user-select: none;
         }
 
         #primary-title {
             font-size: 36px;
             font-weight: 900;
-            /* Walnut Shell/Amber Color */
+            /* Sienna Brown Color for "Try it!" */
             color: #a0522d;
             margin-bottom: 5px;
             display: block;
             letter-spacing: -1px;
-            /* Subtle text shadow for clarity */
-            text-shadow: 1px 1px 0px rgba(255, 255, 255, 1);
         }
 
         #main-heading {
@@ -69,10 +73,13 @@
 
         #gesture-instruction {
             font-size: 13px;
-            color: #8d6e63;
-            /* Muted Nut-Brown */
+            color: #757575;
+            /* Grey */
             font-style: italic;
+            /* Italics */
             margin-top: 15px;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
         }
 
         /* QR Code Styling */
@@ -82,11 +89,11 @@
             right: 20px;
             width: 120px;
             height: 120px;
-            border: 2px solid #5d4037;
-            padding: 3px;
+            border: 1px solid #ddd;
+            padding: 5px;
             background: #fff;
-            border-radius: 6px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             z-index: 10;
         }
     </style>
@@ -155,7 +162,6 @@
             scene.add(sunLight);
             scene.add(new THREE.AmbientLight(0xffffff, 0.6));
 
-            // Cuboid fill ensures it stays bright
             mainMesh = new THREE.Mesh(
                 new THREE.BoxGeometry(1, 1, 1),
                 new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.15 })
