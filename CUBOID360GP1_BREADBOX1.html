@@ -38,14 +38,14 @@
             position: absolute;
             top: 100px;
             left: 20px;
-            max-width: 450px;
-            background: rgba(255, 255, 255, 0.7);
-            padding: 15px 20px;
+            max-width: 480px;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 20px;
             border-left: 5px solid #8d6e63;
             border-radius: 4px;
             z-index: 10;
             pointer-events: none;
-            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.05);
+            box-shadow: 2px 2px 15px rgba(0, 0, 0, 0.08);
         }
 
         .pointer-item {
@@ -54,6 +54,16 @@
             line-height: 1.4;
             color: #4e342e;
             font-weight: 500;
+        }
+
+        /* Styled Instruction under pointers */
+        .instruction-text {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #757575; /* Grey */
+            font-style: italic; /* Italics */
+            border-top: 1px solid #eee;
+            padding-top: 10px;
         }
 
         .pointer-item:last-child {
@@ -74,8 +84,7 @@
         <div class="pointer-item">• What does the number of unit cubes in each layer represent?</div>
         <div class="pointer-item">• What does the number of layers represent?</div>
         <div class="pointer-item">• What does the total number of unit cubes in all the layers together represent?</div>
-        <div class="pointer-item">• What do you obtain when you divide the volume of the cuboid by the surface area of
-            its base layer?</div>
+        <div class="pointer-item">• What do you obtain when you divide the volume of the cuboid by the surface area of its base layer?</div>
         <div class="pointer-item">• What do you obtain when you divide the volume of the cuboid by its height?</div>
         
         <div class="instruction-text">
@@ -90,7 +99,7 @@
             "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
         }
     }
-</script>
+    </script>
 
     <script type="module">
         import * as THREE from 'three';
@@ -112,7 +121,6 @@
         animate();
 
         function init() {
-            // 1. Scene & Renderer
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0xfcfcfc);
 
@@ -124,17 +132,14 @@
             renderer.setPixelRatio(window.devicePixelRatio);
             document.body.appendChild(renderer.domElement);
 
-            // 2. Lighting
             const light = new THREE.DirectionalLight(0xfff5e6, 1.5);
             light.position.set(10, 20, 15);
             scene.add(light);
             scene.add(new THREE.AmbientLight(0xffffff, 0.8));
 
-            // 3. Bread Group
             breadGroup = new THREE.Group();
             scene.add(breadGroup);
 
-            // 4. Container Mesh (Acrylic Display)
             const acrylicMat = new THREE.MeshPhongMaterial({
                 color: 0xeeeeee,
                 transparent: true,
@@ -150,14 +155,12 @@
             createHandles();
             updateCuboid();
 
-            // 5. Controls (Independent 360 degree rotation)
             controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.07;
             controls.mouseButtons = { LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE };
             controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
 
-            // 6. Interaction Listeners
             window.addEventListener('pointerdown', onPointerDown);
             window.addEventListener('pointermove', onPointerMove);
             window.addEventListener('pointerup', onPointerUp);
@@ -165,8 +168,8 @@
         }
 
         function createHandles() {
-            const handleGeo = new THREE.SphereGeometry(0.5); // Large interaction radius
-            const handleMat = new THREE.MeshBasicMaterial({ visible: false }); // Invisible vertices
+            const handleGeo = new THREE.SphereGeometry(0.5); 
+            const handleMat = new THREE.MeshBasicMaterial({ visible: false });
 
             const corners = [
                 [1, 1, 1], [1, 1, -1], [1, -1, 1], [1, -1, -1],
@@ -188,19 +191,16 @@
             const crustMat = new THREE.MeshPhongMaterial({ color: 0xcd853f });
             const crumbMat = new THREE.MeshPhongMaterial({ color: 0xf5f5dc });
             const breadMaterials = [
-                crumbMat, crumbMat, // Crumb on X faces
-                crustMat, crustMat, // Crust on Y faces (Top/Bottom)
-                crumbMat, crumbMat  // Crumb on Z faces
+                crumbMat, crumbMat, // side faces
+                crustMat, crustMat, // Top/Bottom faces
+                crumbMat, crumbMat
             ];
 
             const cubeGeo = new THREE.BoxGeometry(0.95, 0.95, 0.95);
-
-            // Position offset to center the grid
             const startX = -(size.x / 2) + 0.5;
             const startY = -(size.y / 2) + 0.5;
             const startZ = -(size.z / 2) + 0.5;
 
-            // Populate unit bread pieces
             for (let i = 0; i < size.x; i++) {
                 for (let j = 0; j < size.y; j++) {
                     for (let k = 0; k < size.z; k++) {
@@ -212,13 +212,10 @@
             }
 
             acrylicMesh.scale.set(size.x, size.y, size.z);
-
-            // Bold exterior framing
             const extLineMat = new THREE.LineBasicMaterial({ color: 0x333333 });
             const edgeGeo = new THREE.EdgesGeometry(new THREE.BoxGeometry(size.x, size.y, size.z));
             exteriorEdges.add(new THREE.LineSegments(edgeGeo, extLineMat));
 
-            // Sync interaction zones to the current box corners
             const hX = size.x / 2, hY = size.y / 2, hZ = size.z / 2;
             handles.forEach(h => {
                 const d = h.userData.dir;
@@ -229,7 +226,6 @@
         function onPointerDown(event) {
             pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
             pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
             raycaster.setFromCamera(pointer, camera);
             const intersects = raycaster.intersectObjects(handles);
 
@@ -245,19 +241,14 @@
 
         function onPointerMove(event) {
             if (!isDraggingHandle || !activeHandle) return;
-
             pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
             pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
             raycaster.setFromCamera(pointer, camera);
             const plane = new THREE.Plane();
             plane.setFromNormalAndCoplanarPoint(camera.getWorldDirection(new THREE.Vector3()), activeHandle.position);
-
             const intersectPoint = new THREE.Vector3();
             if (raycaster.ray.intersectPlane(plane, intersectPoint)) {
-                // Constraint: Height (Y) snapped between 1 and 4 units. Base fixed.
                 const nextY = Math.max(1, Math.min(4, Math.round(Math.abs(intersectPoint.y) * 2)));
-
                 if (nextY !== size.y) {
                     size.y = nextY;
                     updateCuboid();
