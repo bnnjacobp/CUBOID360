@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Snack Boxes - Height Restricted</title>
+    <title>Snack Box Comparison</title>
     <style>
         body { 
             margin: 0; 
@@ -11,22 +11,61 @@
             overflow: hidden; 
             background-color: #fdfaf0; 
             display: flex; 
+            flex-direction: row;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             touch-action: none; 
             height: 100vh; 
             width: 100vw;
         }
+
+        /* Main Global Heading */
+        #main-title {
+            position: absolute;
+            top: 20px;
+            width: 100%;
+            text-align: center;
+            font-size: clamp(16px, 4vw, 24px);
+            font-weight: bold;
+            color: #5d4037; /* Deep brown */
+            z-index: 100;
+            pointer-events: none;
+            padding: 0 10px;
+            box-sizing: border-box;
+        }
+
         .container {
             flex: 1;
             position: relative;
             outline: 1px solid #e0dacc;
         }
+
+        /* Section Headings */
+        .section-label {
+            position: absolute;
+            top: 70px; /* Positioned below main title */
+            width: 100%;
+            text-align: center;
+            font-size: clamp(14px, 3vw, 18px);
+            font-weight: 600;
+            color: #8d6e63;
+            z-index: 90;
+            pointer-events: none;
+        }
+
         canvas { display: block; width: 100% !important; height: 100% !important; }
     </style>
 </head>
 <body>
 
-<div id="leftView" class="container"></div>
-<div id="rightView" class="container"></div>
+<div id="main-title">Compare the two snack boxes to see which could hold more sandwich pieces!</div>
+
+<div id="leftView" class="container">
+    <div class="section-label">2 layers of 8 sandwich pieces</div>
+</div>
+
+<div id="rightView" class="container">
+    <div class="section-label">3 layers of 6 sandwich pieces</div>
+</div>
 
 <script type="importmap">
     {
@@ -106,9 +145,7 @@
 
         createHandles() {
             const handleGeo = new THREE.SphereGeometry(0.5); // Large hit area
-            const handleMat = new THREE.MeshBasicMaterial({ 
-                visible: false 
-            });
+            const handleMat = new THREE.MeshBasicMaterial({ visible: false });
 
             const corners = [
                 [1,1,1], [1,1,-1], [1,-1,1], [1,-1,-1],
@@ -220,10 +257,10 @@
         }
     }
 
-    // Left Box: Fixed Base 4x2, maxHeight 2
+    // Left Box: Fixed Base 4x2 (8 pieces per layer), starts at 1 layer, can go to 2
     const boxLeft = new SnackBoxInstance('leftView', { x: 4, y: 1, z: 2 }, 2);
     
-    // Right Box: Fixed Base 3x2, maxHeight 3
+    // Right Box: Fixed Base 3x2 (6 pieces per layer), starts at 1 layer, can go to 3
     const boxRight = new SnackBoxInstance('rightView', { x: 3, y: 1, z: 2 }, 3);
 
     function animate() {
