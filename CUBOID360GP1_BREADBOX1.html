@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -13,12 +12,8 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             touch-action: none;
         }
+        canvas { display: block; }
 
-        canvas {
-            display: block;
-        }
-
-        /* Main Heading at Top Centre */
         #main-header {
             position: absolute;
             top: 20px;
@@ -33,13 +28,12 @@
             pointer-events: none;
         }
 
-        /* Inquiry Pointers at Left Top */
         #pointers-container {
             position: absolute;
             top: 100px;
             left: 20px;
             max-width: 480px;
-            background: rgba(255, 255, 255, 0.85);
+            background: rgba(255, 255, 255, 0.9);
             padding: 20px;
             border-left: 5px solid #8d6e63;
             border-radius: 4px;
@@ -54,20 +48,6 @@
             line-height: 1.4;
             color: #4e342e;
             font-weight: 500;
-        }
-
-        /* Styled Instruction under pointers */
-        .instruction-text {
-            margin-top: 15px;
-            font-size: 14px;
-            color: #757575; /* Grey */
-            font-style: italic; /* Italics */
-            border-top: 1px solid #eee;
-            padding-top: 10px;
-        }
-
-        .pointer-item:last-child {
-            margin-bottom: 0;
         }
     </style>
 </head>
@@ -87,7 +67,8 @@
         <div class="pointer-item">• What do you obtain when you divide the volume of the cuboid by the surface area of its base layer?</div>
         <div class="pointer-item">• What do you obtain when you divide the volume of the cuboid by its height?</div>
         
-        <div class="instruction-text">
+        <!-- THE CORRECTED LINE -->
+        <div style="margin-top: 15px; color: #757575; font-style: italic; border-top: 1px solid #eee; padding-top: 10px; font-size: 14px;">
             Use hand gestures to rotate and span the cuboid while exploring these concepts
         </div>
     </div>
@@ -108,8 +89,6 @@
         let scene, camera, renderer, controls;
         let breadGroup, exteriorEdges, acrylicMesh;
         let handles = [];
-
-        // CONSTRAINTS: Base is fixed at 10x4. Height starts at 1, max 4.
         const size = { x: 10, y: 1, z: 4 };
 
         const raycaster = new THREE.Raycaster();
@@ -140,13 +119,10 @@
             breadGroup = new THREE.Group();
             scene.add(breadGroup);
 
-            const acrylicMat = new THREE.MeshPhongMaterial({
-                color: 0xeeeeee,
-                transparent: true,
-                opacity: 0.1,
-                shininess: 100
-            });
-            acrylicMesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), acrylicMat);
+            acrylicMesh = new THREE.Mesh(
+                new THREE.BoxGeometry(1, 1, 1),
+                new THREE.MeshPhongMaterial({ color: 0xeeeeee, transparent: true, opacity: 0.1, shininess: 100 })
+            );
             scene.add(acrylicMesh);
 
             exteriorEdges = new THREE.Group();
@@ -157,7 +133,6 @@
 
             controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
-            controls.dampingFactor = 0.07;
             controls.mouseButtons = { LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE };
             controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
 
@@ -168,14 +143,9 @@
         }
 
         function createHandles() {
-            const handleGeo = new THREE.SphereGeometry(0.5); 
+            const handleGeo = new THREE.SphereGeometry(0.5);
             const handleMat = new THREE.MeshBasicMaterial({ visible: false });
-
-            const corners = [
-                [1, 1, 1], [1, 1, -1], [1, -1, 1], [1, -1, -1],
-                [-1, 1, 1], [-1, 1, -1], [-1, -1, 1], [-1, -1, -1]
-            ];
-
+            const corners = [[1,1,1],[1,1,-1],[1,-1,1],[1,-1,-1],[-1,1,1],[-1,1,-1],[-1,-1,1],[-1,-1,-1]];
             corners.forEach(dir => {
                 const handle = new THREE.Mesh(handleGeo, handleMat);
                 handle.userData = { dir: new THREE.Vector3(...dir) };
@@ -190,13 +160,8 @@
 
             const crustMat = new THREE.MeshPhongMaterial({ color: 0xcd853f });
             const crumbMat = new THREE.MeshPhongMaterial({ color: 0xf5f5dc });
-            const breadMaterials = [
-                crumbMat, crumbMat, // side faces
-                crustMat, crustMat, // Top/Bottom faces
-                crumbMat, crumbMat
-            ];
+            const materials = [crumbMat, crumbMat, crustMat, crustMat, crumbMat, crumbMat];
 
-            const cubeGeo = new THREE.BoxGeometry(0.95, 0.95, 0.95);
             const startX = -(size.x / 2) + 0.5;
             const startY = -(size.y / 2) + 0.5;
             const startZ = -(size.z / 2) + 0.5;
@@ -204,76 +169,48 @@
             for (let i = 0; i < size.x; i++) {
                 for (let j = 0; j < size.y; j++) {
                     for (let k = 0; k < size.z; k++) {
-                        const breadCube = new THREE.Mesh(cubeGeo, breadMaterials);
-                        breadCube.position.set(startX + i, startY + j, startZ + k);
-                        breadGroup.add(breadCube);
+                        const cube = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.95, 0.95), materials);
+                        cube.position.set(startX + i, startY + j, startZ + k);
+                        breadGroup.add(cube);
                     }
                 }
             }
 
             acrylicMesh.scale.set(size.x, size.y, size.z);
-            const extLineMat = new THREE.LineBasicMaterial({ color: 0x333333 });
-            const edgeGeo = new THREE.EdgesGeometry(new THREE.BoxGeometry(size.x, size.y, size.z));
-            exteriorEdges.add(new THREE.LineSegments(edgeGeo, extLineMat));
+            exteriorEdges.add(new THREE.LineSegments(
+                new THREE.EdgesGeometry(new THREE.BoxGeometry(size.x, size.y, size.z)),
+                new THREE.LineBasicMaterial({ color: 0x333333 })
+            ));
 
             const hX = size.x / 2, hY = size.y / 2, hZ = size.z / 2;
-            handles.forEach(h => {
-                const d = h.userData.dir;
-                h.position.set(hX * d.x, hY * d.y, hZ * d.z);
-            });
+            handles.forEach(h => h.position.set(hX * h.userData.dir.x, hY * h.userData.dir.y, hZ * h.userData.dir.z));
         }
 
-        function onPointerDown(event) {
-            pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-            pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        function onPointerDown(e) {
+            pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+            pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
             raycaster.setFromCamera(pointer, camera);
-            const intersects = raycaster.intersectObjects(handles);
-
-            if (intersects.length > 0) {
-                isDraggingHandle = true;
-                activeHandle = intersects[0].object;
-                controls.enabled = false;
-            } else {
-                isDraggingHandle = false;
-                controls.enabled = true;
-            }
+            const hits = raycaster.intersectObjects(handles);
+            if (hits.length > 0) { isDraggingHandle = true; activeHandle = hits[0].object; controls.enabled = false; }
+            else { isDraggingHandle = false; controls.enabled = true; }
         }
 
-        function onPointerMove(event) {
+        function onPointerMove(e) {
             if (!isDraggingHandle || !activeHandle) return;
-            pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-            pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+            pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
             raycaster.setFromCamera(pointer, camera);
-            const plane = new THREE.Plane();
-            plane.setFromNormalAndCoplanarPoint(camera.getWorldDirection(new THREE.Vector3()), activeHandle.position);
-            const intersectPoint = new THREE.Vector3();
-            if (raycaster.ray.intersectPlane(plane, intersectPoint)) {
-                const nextY = Math.max(1, Math.min(4, Math.round(Math.abs(intersectPoint.y) * 2)));
-                if (nextY !== size.y) {
-                    size.y = nextY;
-                    updateCuboid();
-                }
+            const plane = new THREE.Plane().setFromNormalAndCoplanarPoint(camera.getWorldDirection(new THREE.Vector3()), activeHandle.position);
+            const pt = new THREE.Vector3();
+            if (raycaster.ray.intersectPlane(plane, pt)) {
+                const ny = Math.max(1, Math.min(4, Math.round(Math.abs(pt.y) * 2)));
+                if (ny !== size.y) { size.y = ny; updateCuboid(); }
             }
         }
 
-        function onPointerUp() {
-            isDraggingHandle = false;
-            activeHandle = null;
-            controls.enabled = true;
-        }
-
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        function animate() {
-            requestAnimationFrame(animate);
-            controls.update();
-            renderer.render(scene, camera);
-        }
+        function onPointerUp() { isDraggingHandle = false; activeHandle = null; controls.enabled = true; }
+        function onWindowResize() { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); }
+        function animate() { requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); }
     </script>
 </body>
-
 </html>
