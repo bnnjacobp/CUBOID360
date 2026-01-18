@@ -24,9 +24,10 @@
             top: 15px;
             width: 100%;
             text-align: center;
-            font-size: clamp(22px, 4vw, 30px);
+            font-size: clamp(20px, 3.5vw, 28px);
             font-weight: 800;
-            color: #3e2723;
+            color: #3B2314;
+            /* Deep Chocolate Brown */
             z-index: 10;
             pointer-events: none;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
@@ -35,12 +36,14 @@
         /* --- Side Panel Textbox (Top Left) --- */
         #info-box {
             position: absolute;
-            top: 80px;
+            top: 75px;
             left: 20px;
-            max-width: 480px;
+            max-width: 380px;
+            /* Width further reduced for maximum cuboid visibility */
             background: rgba(255, 255, 255, 0.9);
             padding: 25px;
-            border-left: 8px solid #a0522d;
+            border-left: 8px solid #D2691E;
+            /* Walnut accent color */
             border-radius: 15px;
             box-shadow: 2px 2px 20px rgba(0, 0, 0, 0.1);
             z-index: 10;
@@ -48,34 +51,35 @@
         }
 
         #description {
-            font-size: 15.5px;
-            line-height: 1.6;
+            font-size: 15px;
+            line-height: 1.5;
             color: #3e2723;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .think-title {
-            font-size: 18px;
+            font-size: 17px;
             font-weight: bold;
-            color: #a0522d;
+            color: #D2691E;
             display: block;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             text-decoration: underline;
         }
 
         .question {
-            font-size: 14.5px;
+            font-size: 14px;
             color: #4e342e;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             font-weight: 600;
             display: list-item;
             list-style-type: square;
             margin-left: 20px;
         }
 
+        /* --- Instructions in Grey Italics --- */
         .instruction-group {
             margin-top: 20px;
-            padding-top: 15px;
+            padding-top: 12px;
             border-top: 1px solid #eee;
         }
 
@@ -83,12 +87,14 @@
             display: block;
             font-size: 13px;
             color: #757575;
+            /* Grey */
             font-style: italic;
+            /* Italics */
             margin-bottom: 6px;
             line-height: 1.4;
         }
 
-        /* --- UI Bottom Bar --- */
+        /* --- Bottom UI Bar --- */
         #ui-bar {
             position: absolute;
             bottom: 30px;
@@ -125,7 +131,6 @@
             text-align: center;
             font-size: 16px;
             font-weight: bold;
-            color: #3e2723;
         }
 
         #toggle-btn {
@@ -133,7 +138,7 @@
             font-size: 14px;
             font-weight: bold;
             color: white;
-            background-color: #a0522d;
+            background-color: #0088ff;
             border: none;
             border-radius: 25px;
             cursor: pointer;
@@ -150,8 +155,8 @@
             position: absolute;
             bottom: 20px;
             right: 20px;
-            width: 130px;
-            height: 130px;
+            width: 125px;
+            height: 125px;
             background: white;
             padding: 5px;
             border: 1px solid #ddd;
@@ -168,7 +173,8 @@
 
     <div id="info-box">
         <div id="description">
-            This is a model of a box of dates covered with balls, commonly shared in the UAE during Islamic occasions
+            This is a model of a box of balls with dates and nuts, commonly shared in the UAE during Islamic
+            occasions
             such as Ramadan, Eid, and family gatherings, in the shape of a cuboid. Count the number of balls in each
             layer and multiply it by the number of layers to answer the following questions:
         </div>
@@ -212,7 +218,7 @@
         <button id="toggle-btn">Span: Enabled</button>
     </div>
 
-    <img id="qr-display" src="BOX12×12×12qr.png" alt="Scan QR Code">
+    <img id="qr-display" src="qr.png" alt="Scan QR Code">
 
     <script type="importmap">
     {
@@ -221,14 +227,14 @@
             "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
         }
     }
-    </script>
+</script>
 
     <script type="module">
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
         let scene, camera, renderer, controls;
-        let mainMesh, internalGrid, exteriorEdges, dateGroup;
+        let barMesh, internalGrid, exteriorEdges, peanutGroup;
         let handles = [];
 
         let size = { x: 1, y: 1, z: 1 };
@@ -242,7 +248,7 @@
         const inputX = document.getElementById('input-x');
         const inputY = document.getElementById('input-y');
         const inputZ = document.getElementById('input-z');
-        const spanBtn = document.getElementById('toggle-btn');
+        const btnSpan = document.getElementById('toggle-btn');
 
         init();
         animate();
@@ -251,31 +257,30 @@
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0xffffff);
 
-            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(12, 10, 16);
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(14, 12, 16);
 
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.toneMapping = THREE.ACESFilmicToneMapping;
             document.body.appendChild(renderer.domElement);
 
-            const light = new THREE.DirectionalLight(0xffffff, 2);
-            light.position.set(10, 20, 15);
+            const light = new THREE.DirectionalLight(0xffffff, 1.5);
+            light.position.set(15, 25, 20);
             scene.add(light);
-            scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+            scene.add(new THREE.AmbientLight(0xfff5e6, 0.8));
 
             const material = new THREE.MeshPhongMaterial({
-                color: 0xffffff,
+                color: 0xD2691E,
                 transparent: true,
-                opacity: 0.1,
-                shininess: 0
+                opacity: 0.15,
+                shininess: 60
             });
-            mainMesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), material);
-            scene.add(mainMesh);
+            barMesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), material);
+            scene.add(barMesh);
 
-            dateGroup = new THREE.Group();
-            scene.add(dateGroup);
+            peanutGroup = new THREE.Group();
+            scene.add(peanutGroup);
 
             internalGrid = new THREE.Group();
             scene.add(internalGrid);
@@ -288,8 +293,8 @@
 
             controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
-            controls.dampingFactor = 0.05;
             controls.mouseButtons = { LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE };
+            controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
 
             [inputX, inputY, inputZ].forEach(input => {
                 input.addEventListener('input', () => {
@@ -300,10 +305,10 @@
                 });
             });
 
-            spanBtn.addEventListener('click', () => {
+            btnSpan.addEventListener('click', () => {
                 canExtend = !canExtend;
-                spanBtn.textContent = canExtend ? "Span: Enabled" : "Span: Disabled";
-                spanBtn.classList.toggle('disabled', !canExtend);
+                btnSpan.textContent = canExtend ? "Span: Enabled" : "Span: Disabled";
+                btnSpan.classList.toggle('disabled', !canExtend);
             });
 
             window.addEventListener('pointerdown', onPointerDown);
@@ -312,91 +317,51 @@
             window.addEventListener('resize', onWindowResize);
         }
 
-        // --- ENHANCED WRINKLED DATE GEOMETRY ---
-        function createDateGeometry() {
-            const geo = new THREE.SphereGeometry(0.38, 40, 40);
-            const pos = geo.attributes.position;
-            const v = new THREE.Vector3();
-
-            for (let i = 0; i < pos.count; i++) {
-                v.fromBufferAttribute(pos, i);
-
-                // Oblong stretch for Medjool shape
-                v.y *= 1.5;
-
-                const angle = Math.atan2(v.x, v.z);
-
-                // Deep longitudinal ridges matching the photo
-                const ridges = Math.sin(angle * 6.0) * 0.05;
-
-                // Irregular bumpy "organic" noise
-                const bumps = Math.sin(v.y * 12.0) * Math.sin(angle * 10.0) * 0.025;
-
-                // General skin ripple
-                const ripple = Math.cos(v.y * 8.0) * 0.03;
-
-                v.addScaledVector(v, ridges + bumps + ripple);
-
-                pos.setXYZ(i, v.x, v.y, v.z);
-            }
-            geo.computeVertexNormals();
-            return geo;
-        }
-
         function createHandles() {
             const handleGeo = new THREE.SphereGeometry(0.5);
             const handleMat = new THREE.MeshBasicMaterial({ visible: false });
-            const corners = [[1, 1, 1], [1, 1, -1], [1, -1, 1], [1, -1, -1], [-1, 1, 1], [-1, 1, -1], [-1, -1, 1], [-1, -1, -1]];
+            const corners = [
+                [1, 1, 1], [1, 1, -1], [1, -1, 1], [1, -1, -1],
+                [-1, 1, 1], [-1, 1, -1], [-1, -1, 1], [-1, -1, -1]
+            ];
             corners.forEach(dir => {
-                const h = new THREE.Mesh(handleGeo, handleMat);
-                h.userData = { dir: new THREE.Vector3(...dir) };
-                scene.add(h);
-                handles.push(h);
+                const handle = new THREE.Mesh(handleGeo, handleMat);
+                handle.userData = { dir: new THREE.Vector3(...dir) };
+                scene.add(handle);
+                handles.push(handle);
             });
         }
 
         function updateCuboid() {
             inputX.value = size.x; inputY.value = size.y; inputZ.value = size.z;
-            mainMesh.scale.set(size.x, size.y, size.z);
+            barMesh.scale.set(size.x, size.y, size.z);
 
-            while (dateGroup.children.length > 0) dateGroup.remove(dateGroup.children[0]);
+            while (peanutGroup.children.length > 0) peanutGroup.remove(peanutGroup.children[0]);
             while (internalGrid.children.length > 0) internalGrid.remove(internalGrid.children[0]);
             while (exteriorEdges.children.length > 0) exteriorEdges.remove(exteriorEdges.children[0]);
 
             const hX = size.x / 2, hY = size.y / 2, hZ = size.z / 2;
 
-            // CORRECTED: Darker Reddish-Brown Material with High Gloss
-            const dateMat = new THREE.MeshStandardMaterial({
-                color: 0x8b3103,
-                roughness: 0.28,
-                metalness: 0.05,
-                flatShading: false
-            });
-            const dateGeo = createDateGeometry();
+            const peanutGeo = new THREE.SphereGeometry(0.25, 12, 12);
+            const peanutMat = new THREE.MeshPhongMaterial({ color: 0xF5F5DC });
 
             for (let i = 0; i < size.x; i++) {
                 for (let j = 0; j < size.y; j++) {
                     for (let k = 0; k < size.z; k++) {
-                        const dateFruit = new THREE.Mesh(dateGeo, dateMat);
-                        dateFruit.position.set((i - hX + 0.5), (j - hY + 0.5), (k - hZ + 0.5));
-
-                        // Natural randomness in orientation
-                        dateFruit.rotation.set(Math.random() * 0.2, Math.random() * Math.PI, Math.random() * 0.1);
-                        dateGroup.add(dateFruit);
+                        const peanut = new THREE.Mesh(peanutGeo, peanutMat);
+                        peanut.position.set((i - hX + 0.5), (j - hY + 0.5), (k - hZ + 0.5));
+                        peanutGroup.add(peanut);
                     }
                 }
             }
 
             const intLineMat = new THREE.LineBasicMaterial({ color: 0x555555 });
-            const extLineMat = new THREE.LineBasicMaterial({ color: 0x000000 });
-
             const pts = [];
             for (let j = -hY; j <= hY; j++) for (let k = -hZ; k <= hZ; k++) pts.push(new THREE.Vector3(-hX, j, k), new THREE.Vector3(hX, j, k));
             for (let i = -hX; i <= hX; i++) for (let k = -hZ; k <= hZ; k++) pts.push(new THREE.Vector3(i, -hY, k), new THREE.Vector3(i, hY, k));
             for (let i = -hX; i <= hX; i++) for (let j = -hY; j <= hY; j++) pts.push(new THREE.Vector3(i, j, -hZ), new THREE.Vector3(i, j, hZ));
-
             internalGrid.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts), intLineMat));
-            exteriorEdges.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(size.x, size.y, size.z)), extLineMat));
+            exteriorEdges.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(size.x, size.y, size.z)), new THREE.LineBasicMaterial({ color: 0x000000 })));
 
             handles.forEach(h => h.position.set(hX * h.userData.dir.x, hY * h.userData.dir.y, hZ * h.userData.dir.z));
         }
@@ -425,11 +390,15 @@
             const plane = new THREE.Plane().setFromNormalAndCoplanarPoint(camera.getWorldDirection(new THREE.Vector3()), activeHandle.position);
             const intersectPoint = new THREE.Vector3();
             if (raycaster.ray.intersectPlane(plane, intersectPoint)) {
+
                 const nextX = Math.max(1, Math.min(12, Math.round(Math.abs(intersectPoint.x) * 2)));
                 const nextY = Math.max(1, Math.min(12, Math.round(Math.abs(intersectPoint.y) * 2)));
                 const nextZ = Math.max(1, Math.min(12, Math.round(Math.abs(intersectPoint.z) * 2)));
+
                 if (nextX !== size.x || nextY !== size.y || nextZ !== size.z) {
-                    size.x = nextX; size.y = nextY; size.z = nextZ;
+                    size.x = nextX;
+                    size.y = nextY;
+                    size.z = nextZ;
                     updateCuboid();
                 }
             }
