@@ -1,23 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>3D Bread Box - Restricted Height</title>
+    <title>Educational Bread Box Applet</title>
     <style>
-        body { 
-            margin: 0; 
-            overflow: hidden; 
-            background-color: #fcfcfc; 
-            font-family: sans-serif;
-            touch-action: none; 
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #fcfcfc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            touch-action: none;
         }
-        canvas { display: block; }
+
+        canvas {
+            display: block;
+        }
+
+        /* Main Heading at Top Centre */
+        #main-header {
+            position: absolute;
+            top: 20px;
+            width: 100%;
+            text-align: center;
+            padding: 0 20px;
+            box-sizing: border-box;
+            font-size: clamp(18px, 2.5vw, 24px);
+            font-weight: bold;
+            color: #3e2723;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        /* Inquiry Pointers at Left Top */
+        #pointers-container {
+            position: absolute;
+            top: 100px;
+            left: 20px;
+            max-width: 450px;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 15px 20px;
+            border-left: 5px solid #8d6e63;
+            border-radius: 4px;
+            z-index: 10;
+            pointer-events: none;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .pointer-item {
+            margin-bottom: 12px;
+            font-size: clamp(13px, 1.5vw, 15px);
+            line-height: 1.4;
+            color: #4e342e;
+            font-weight: 500;
+        }
+
+        .pointer-item:last-child {
+            margin-bottom: 0;
+        }
     </style>
 </head>
+
 <body>
 
-<script type="importmap">
+    <div id="main-header">
+        A model of a cuboidal bread box is given. Your school has decided to donate it to charity. <br>
+        Find the volume of the bread box by counting the unit cubes of breads filled in it!
+    </div>
+
+    <div id="pointers-container">
+        <div class="pointer-item">• What do the number of unit cubes in each layer represent?</div>
+        <div class="pointer-item">• What do the number of layers represent?</div>
+        <div class="pointer-item">• What do the number of unit cubes in all the layers together represent?</div>
+        <div class="pointer-item">• What will you get if you divide the volume of the cuboid by the surface area of the
+            base layer?</div>
+        <div class="pointer-item">• What will you get if you divide the volume of the cuboid by its height?</div>
+    </div>
+
+    <script type="importmap">
     {
         "imports": {
             "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
@@ -26,186 +87,197 @@
     }
 </script>
 
-<script type="module">
-    import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-    let scene, camera, renderer, controls;
-    let breadGroup, exteriorEdges, acrylicMesh;
-    let handles = [];
-    
-    // Constraints: Base is fixed at 10x4. Height (y) starts at 1.
-    const size = { x: 10, y: 1, z: 4 }; 
+        let scene, camera, renderer, controls;
+        let breadGroup, exteriorEdges, acrylicMesh;
+        let handles = [];
 
-    const raycaster = new THREE.Raycaster();
-    const pointer = new THREE.Vector2();
-    let isDraggingHandle = false;
-    let activeHandle = null;
+        // CONSTRAINTS: Base is fixed at 10x4. Height starts at 1, max 4.
+        const size = { x: 10, y: 1, z: 4 };
 
-    init();
-    animate();
+        const raycaster = new THREE.Raycaster();
+        const pointer = new THREE.Vector2();
+        let isDraggingHandle = false;
+        let activeHandle = null;
 
-    function init() {
-        scene = new THREE.Scene();
-        scene.background = new THREE.Color(0xfcfcfc); 
+        init();
+        animate();
 
-        camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(15, 12, 18);
+        function init() {
+            // 1. Scene & Renderer
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xfcfcfc);
 
-        renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        document.body.appendChild(renderer.domElement);
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(16, 12, 18);
 
-        const light = new THREE.DirectionalLight(0xfff5e6, 1.5);
-        light.position.set(10, 20, 15);
-        scene.add(light);
-        scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            document.body.appendChild(renderer.domElement);
 
-        breadGroup = new THREE.Group();
-        scene.add(breadGroup);
+            // 2. Lighting
+            const light = new THREE.DirectionalLight(0xfff5e6, 1.5);
+            light.position.set(10, 20, 15);
+            scene.add(light);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.8));
 
-        const acrylicMat = new THREE.MeshPhongMaterial({ 
-            color: 0xeeeeee, 
-            transparent: true, 
-            opacity: 0.1, 
-            shininess: 100 
-        });
-        acrylicMesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), acrylicMat);
-        scene.add(acrylicMesh);
+            // 3. Bread Group
+            breadGroup = new THREE.Group();
+            scene.add(breadGroup);
 
-        exteriorEdges = new THREE.Group();
-        scene.add(exteriorEdges);
+            // 4. Container Mesh (Acrylic Display)
+            const acrylicMat = new THREE.MeshPhongMaterial({
+                color: 0xeeeeee,
+                transparent: true,
+                opacity: 0.1,
+                shininess: 100
+            });
+            acrylicMesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), acrylicMat);
+            scene.add(acrylicMesh);
 
-        createHandles();
-        updateCuboid();
+            exteriorEdges = new THREE.Group();
+            scene.add(exteriorEdges);
 
-        controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.07;
-        controls.mouseButtons = { LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE };
-        controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
+            createHandles();
+            updateCuboid();
 
-        window.addEventListener('pointerdown', onPointerDown);
-        window.addEventListener('pointermove', onPointerMove);
-        window.addEventListener('pointerup', onPointerUp);
-        window.addEventListener('resize', onWindowResize);
-    }
+            // 5. Controls (Independent 360 degree rotation)
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.07;
+            controls.mouseButtons = { LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE };
+            controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
 
-    function createHandles() {
-        const handleGeo = new THREE.SphereGeometry(0.5); // Large hit area
-        const handleMat = new THREE.MeshBasicMaterial({ visible: false });
+            // 6. Interaction Listeners
+            window.addEventListener('pointerdown', onPointerDown);
+            window.addEventListener('pointermove', onPointerMove);
+            window.addEventListener('pointerup', onPointerUp);
+            window.addEventListener('resize', onWindowResize);
+        }
 
-        const corners = [
-            [1,1,1], [1,1,-1], [1,-1,1], [1,-1,-1],
-            [-1,1,1], [-1,1,-1], [-1,-1,1], [-1,-1,-1]
-        ];
+        function createHandles() {
+            const handleGeo = new THREE.SphereGeometry(0.5); // Large interaction radius
+            const handleMat = new THREE.MeshBasicMaterial({ visible: false }); // Invisible vertices
 
-        corners.forEach(dir => {
-            const handle = new THREE.Mesh(handleGeo, handleMat);
-            handle.userData = { dir: new THREE.Vector3(...dir) };
-            scene.add(handle);
-            handles.push(handle);
-        });
-    }
+            const corners = [
+                [1, 1, 1], [1, 1, -1], [1, -1, 1], [1, -1, -1],
+                [-1, 1, 1], [-1, 1, -1], [-1, -1, 1], [-1, -1, -1]
+            ];
 
-    function updateCuboid() {
-        while(breadGroup.children.length > 0) breadGroup.remove(breadGroup.children[0]);
-        while(exteriorEdges.children.length > 0) exteriorEdges.remove(exteriorEdges.children[0]);
+            corners.forEach(dir => {
+                const handle = new THREE.Mesh(handleGeo, handleMat);
+                handle.userData = { dir: new THREE.Vector3(...dir) };
+                scene.add(handle);
+                handles.push(handle);
+            });
+        }
 
-        const crustMat = new THREE.MeshPhongMaterial({ color: 0xcd853f }); 
-        const crumbMat = new THREE.MeshPhongMaterial({ color: 0xf5f5dc }); 
-        const breadMaterials = [
-            crumbMat, crumbMat, // Crumb on X sides
-            crustMat, crustMat, // Crust on Top/Bottom (Y sides)
-            crumbMat, crumbMat  // Crumb on Z sides
-        ];
+        function updateCuboid() {
+            while (breadGroup.children.length > 0) breadGroup.remove(breadGroup.children[0]);
+            while (exteriorEdges.children.length > 0) exteriorEdges.remove(exteriorEdges.children[0]);
 
-        const cubeGeo = new THREE.BoxGeometry(0.95, 0.95, 0.95);
+            const crustMat = new THREE.MeshPhongMaterial({ color: 0xcd853f });
+            const crumbMat = new THREE.MeshPhongMaterial({ color: 0xf5f5dc });
+            const breadMaterials = [
+                crumbMat, crumbMat, // Crumb on X faces
+                crustMat, crustMat, // Crust on Y faces (Top/Bottom)
+                crumbMat, crumbMat  // Crumb on Z faces
+            ];
 
-        const startX = -(size.x / 2) + 0.5;
-        const startY = -(size.y / 2) + 0.5;
-        const startZ = -(size.z / 2) + 0.5;
+            const cubeGeo = new THREE.BoxGeometry(0.95, 0.95, 0.95);
 
-        for (let i = 0; i < size.x; i++) {
-            for (let j = 0; j < size.y; j++) {
-                for (let k = 0; k < size.z; k++) {
-                    const breadCube = new THREE.Mesh(cubeGeo, breadMaterials);
-                    breadCube.position.set(startX + i, startY + j, startZ + k);
-                    breadGroup.add(breadCube);
+            // Position offset to center the grid
+            const startX = -(size.x / 2) + 0.5;
+            const startY = -(size.y / 2) + 0.5;
+            const startZ = -(size.z / 2) + 0.5;
+
+            // Populate unit bread pieces
+            for (let i = 0; i < size.x; i++) {
+                for (let j = 0; j < size.y; j++) {
+                    for (let k = 0; k < size.z; k++) {
+                        const breadCube = new THREE.Mesh(cubeGeo, breadMaterials);
+                        breadCube.position.set(startX + i, startY + j, startZ + k);
+                        breadGroup.add(breadCube);
+                    }
+                }
+            }
+
+            acrylicMesh.scale.set(size.x, size.y, size.z);
+
+            // Bold exterior framing
+            const extLineMat = new THREE.LineBasicMaterial({ color: 0x333333 });
+            const edgeGeo = new THREE.EdgesGeometry(new THREE.BoxGeometry(size.x, size.y, size.z));
+            exteriorEdges.add(new THREE.LineSegments(edgeGeo, extLineMat));
+
+            // Sync interaction zones to the current box corners
+            const hX = size.x / 2, hY = size.y / 2, hZ = size.z / 2;
+            handles.forEach(h => {
+                const d = h.userData.dir;
+                h.position.set(hX * d.x, hY * d.y, hZ * d.z);
+            });
+        }
+
+        function onPointerDown(event) {
+            pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+            pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(pointer, camera);
+            const intersects = raycaster.intersectObjects(handles);
+
+            if (intersects.length > 0) {
+                isDraggingHandle = true;
+                activeHandle = intersects[0].object;
+                controls.enabled = false;
+            } else {
+                isDraggingHandle = false;
+                controls.enabled = true;
+            }
+        }
+
+        function onPointerMove(event) {
+            if (!isDraggingHandle || !activeHandle) return;
+
+            pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+            pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(pointer, camera);
+            const plane = new THREE.Plane();
+            plane.setFromNormalAndCoplanarPoint(camera.getWorldDirection(new THREE.Vector3()), activeHandle.position);
+
+            const intersectPoint = new THREE.Vector3();
+            if (raycaster.ray.intersectPlane(plane, intersectPoint)) {
+                // Constraint: Height (Y) snapped between 1 and 4 units. Base fixed.
+                const nextY = Math.max(1, Math.min(4, Math.round(Math.abs(intersectPoint.y) * 2)));
+
+                if (nextY !== size.y) {
+                    size.y = nextY;
+                    updateCuboid();
                 }
             }
         }
 
-        acrylicMesh.scale.set(size.x, size.y, size.z);
-        const extLineMat = new THREE.LineBasicMaterial({ color: 0x333333 }); 
-        const edgeGeo = new THREE.EdgesGeometry(new THREE.BoxGeometry(size.x, size.y, size.z));
-        exteriorEdges.add(new THREE.LineSegments(edgeGeo, extLineMat));
-
-        const hX = size.x / 2, hY = size.y / 2, hZ = size.z / 2;
-        handles.forEach(h => {
-            const d = h.userData.dir;
-            h.position.set(hX * d.x, hY * d.y, hZ * d.z);
-        });
-    }
-
-    function onPointerDown(event) {
-        pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-        pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-        raycaster.setFromCamera(pointer, camera);
-        const intersects = raycaster.intersectObjects(handles);
-
-        if (intersects.length > 0) {
-            isDraggingHandle = true;
-            activeHandle = intersects[0].object;
-            controls.enabled = false; 
-        } else {
+        function onPointerUp() {
             isDraggingHandle = false;
-            controls.enabled = true; 
+            activeHandle = null;
+            controls.enabled = true;
         }
-    }
 
-    function onPointerMove(event) {
-        if (!isDraggingHandle || !activeHandle) return;
-
-        pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-        pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-        raycaster.setFromCamera(pointer, camera);
-        const plane = new THREE.Plane();
-        plane.setFromNormalAndCoplanarPoint(camera.getWorldDirection(new THREE.Vector3()), activeHandle.position);
-
-        const intersectPoint = new THREE.Vector3();
-        if (raycaster.ray.intersectPlane(plane, intersectPoint)) {
-            // LOCK: X is always 10, Z is always 4.
-            // Only Y (height) is allowed to change.
-            const nextY = Math.max(1, Math.min(4, Math.round(Math.abs(intersectPoint.y) * 2)));
-
-            if (nextY !== size.y) {
-                size.y = nextY;
-                updateCuboid();
-            }
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
         }
-    }
 
-    function onPointerUp() {
-        isDraggingHandle = false;
-        activeHandle = null;
-        controls.enabled = true; 
-    }
-
-    function onWindowResize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    }
-
-    function animate() {
-        requestAnimationFrame(animate);
-        controls.update(); 
-        renderer.render(scene, camera);
-    }
-</script>
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+    </script>
 </body>
+
 </html>
