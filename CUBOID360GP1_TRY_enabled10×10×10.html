@@ -1,254 +1,444 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>3D Unit Cube - 10x10x10 Limit</title>
+    <title>UAE Culture: Box of Dates - Volume Explorer</title>
     <style>
-        body { 
-            margin: 0; 
-            overflow: hidden; 
-            background-color: #ffffff; 
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #ffffff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            touch-action: none; 
+            touch-action: none;
         }
-        canvas { display: block; }
 
-        /* Bottom Center Button */
-        #toggle-btn {
+        canvas {
+            display: block;
+        }
+
+        /* --- Main Page Heading --- */
+        #main-header {
+            position: absolute;
+            top: 15px;
+            width: 100%;
+            text-align: center;
+            font-size: clamp(22px, 4vw, 30px);
+            font-weight: 800;
+            color: #3e2723;
+            z-index: 10;
+            pointer-events: none;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* --- Side Panel Textbox (Top Left) --- */
+        #info-box {
+            position: absolute;
+            top: 80px;
+            left: 20px;
+            max-width: 480px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 25px;
+            border-left: 8px solid #a0522d;
+            border-radius: 15px;
+            box-shadow: 2px 2px 20px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        #description {
+            font-size: 15.5px;
+            line-height: 1.6;
+            color: #3e2723;
+            margin-bottom: 20px;
+        }
+
+        .think-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #a0522d;
+            display: block;
+            margin-bottom: 12px;
+            text-decoration: underline;
+        }
+
+        .question {
+            font-size: 14.5px;
+            color: #4e342e;
+            margin-bottom: 10px;
+            font-weight: 600;
+            display: list-item;
+            list-style-type: square;
+            margin-left: 20px;
+        }
+
+        .instruction-group {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .instruction-text {
+            display: block;
+            font-size: 13px;
+            color: #757575;
+            font-style: italic;
+            margin-bottom: 6px;
+            line-height: 1.4;
+        }
+
+        /* --- UI Bottom Bar --- */
+        #ui-bar {
             position: absolute;
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 20px;
+            border-radius: 50px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+            border: 1px solid #ddd;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .input-group label {
+            font-weight: bold;
+            color: #5d4037;
+            font-size: 14px;
+        }
+
+        .dimension-input {
+            width: 50px;
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            text-align: center;
             font-size: 16px;
             font-weight: bold;
+            color: #3e2723;
+        }
+
+        #toggle-btn {
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: bold;
             color: white;
-            background-color: #0088ff;
+            background-color: #a0522d;
             border: none;
-            border-radius: 50px;
+            border-radius: 25px;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 136, 255, 0.3);
             transition: all 0.3s ease;
-            user-select: none;
-            z-index: 100;
+            white-space: nowrap;
         }
 
         #toggle-btn.disabled {
             background-color: #555555;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
-        #toggle-btn:active {
-            transform: translateX(-50%) scale(0.95);
+        /* --- QR Code Bottom Right --- */
+        #qr-display {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 130px;
+            height: 130px;
+            background: white;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            z-index: 100;
         }
     </style>
 </head>
+
 <body>
 
-<button id="toggle-btn">Span: Enabled</button>
+    <div id="main-header">Exploring Volume Through a Box of Dates</div>
 
-<script type="importmap">
+    <div id="info-box">
+        <div id="description">
+            This is a model of a box of dates covered with balls, commonly shared in the UAE during Islamic occasions
+            such as Ramadan, Eid, and family gatherings, in the shape of a cuboid. Count the number of balls in each
+            layer and multiply it by the number of layers to answer the following questions:
+        </div>
+
+        <span class="think-title">Think and Answer</span>
+        <div class="question">What does the number of balls in each layer represent? Calculate the surface area of the
+            base of the cuboid.</div>
+        <div class="question">What does the number of layers represent? Calculate the height of the cuboid.</div>
+        <div class="question">What does the total number of balls in all the layers together represent? Calculate the
+            volume of the cuboid.</div>
+        <div class="question">What do you obtain if you divide the total number of balls by the number of layers? What
+            do you obtain if you divide the volume of the cuboid by the height of the cuboid? Are the values same or
+            different? If the values are same what does the value represent?.</div>
+        <div class="question">What do you obtain if you divide the total number of balls by the number of balls in one
+            layer? What do you obtain if you divide the volume of the cuboid by the surface area of the base of the
+            cuboid? Are the values same or different? If the values are same what does the value represent?.</div>
+
+        <div class="instruction-group">
+            <span class="instruction-text">Use hand gestures to rotate and span the cuboid while exploring these
+                concepts.</span>
+            <span class="instruction-text">Use the input boxes to enter the length, breadth, and height of the required
+                cuboid.</span>
+            <span class="instruction-text">Disable the “Span” button to prevent accidental changes to the dimensions of
+                the cuboid.</span>
+        </div>
+    </div>
+
+    <div id="ui-bar">
+        <div class="input-group">
+            <label>L:</label>
+            <input type="number" id="input-x" class="dimension-input" min="1" max="12" value="1">
+        </div>
+        <div class="input-group">
+            <label>B:</label>
+            <input type="number" id="input-z" class="dimension-input" min="1" max="12" value="1">
+        </div>
+        <div class="input-group">
+            <label>H:</label>
+            <input type="number" id="input-y" class="dimension-input" min="1" max="12" value="1">
+        </div>
+        <button id="toggle-btn">Span: Enabled</button>
+    </div>
+
+    <img id="qr-display" src="BOX12×12×12qr.png" alt="Scan QR Code">
+
+    <script type="importmap">
     {
         "imports": {
             "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
             "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
         }
     }
-</script>
+    </script>
 
-<script type="module">
-    import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-    let scene, camera, renderer, controls;
-    let barMesh, internalGrid, exteriorEdges, peanutGroup;
-    let handles = [];
-    
-    // STARTING STATE: 1x1x1
-    let size = { x: 1, y: 1, z: 1 }; 
-    let canExtend = true; 
+        let scene, camera, renderer, controls;
+        let mainMesh, internalGrid, exteriorEdges, dateGroup;
+        let handles = [];
 
-    const raycaster = new THREE.Raycaster();
-    const pointer = new THREE.Vector2();
-    let isDraggingHandle = false;
-    let activeHandle = null;
+        let size = { x: 1, y: 1, z: 1 };
+        let canExtend = true;
 
-    init();
-    animate();
+        const raycaster = new THREE.Raycaster();
+        const pointer = new THREE.Vector2();
+        let isDraggingHandle = false;
+        let activeHandle = null;
 
-    function init() {
-        scene = new THREE.Scene();
-        scene.background = new THREE.Color(0xffffff);
+        const inputX = document.getElementById('input-x');
+        const inputY = document.getElementById('input-y');
+        const inputZ = document.getElementById('input-z');
+        const spanBtn = document.getElementById('toggle-btn');
 
-        camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-        // Camera positioned to accommodate a box growing up to 10 units
-        camera.position.set(12, 10, 15); 
+        init();
+        animate();
 
-        renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        document.body.appendChild(renderer.domElement);
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xffffff);
 
-        const light = new THREE.DirectionalLight(0xffffff, 1.5);
-        light.position.set(10, 20, 15);
-        scene.add(light);
-        scene.add(new THREE.AmbientLight(0xfff5e6, 0.8));
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(12, 10, 16);
 
-        const material = new THREE.MeshPhongMaterial({ 
-            color: 0xD2691E, 
-            transparent: true, 
-            opacity: 0.15, 
-            shininess: 60 
-        });
-        barMesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), material);
-        scene.add(barMesh);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            document.body.appendChild(renderer.domElement);
 
-        peanutGroup = new THREE.Group();
-        scene.add(peanutGroup);
+            const light = new THREE.DirectionalLight(0xffffff, 2);
+            light.position.set(10, 20, 15);
+            scene.add(light);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.6));
 
-        internalGrid = new THREE.Group();
-        scene.add(internalGrid);
-        
-        exteriorEdges = new THREE.Group();
-        scene.add(exteriorEdges);
+            const material = new THREE.MeshPhongMaterial({
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.1,
+                shininess: 0
+            });
+            mainMesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), material);
+            scene.add(mainMesh);
 
-        createHandles();
-        updateCuboid();
+            dateGroup = new THREE.Group();
+            scene.add(dateGroup);
 
-        controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.07;
-        controls.mouseButtons = { LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE };
-        controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
+            internalGrid = new THREE.Group();
+            scene.add(internalGrid);
 
-        const btn = document.getElementById('toggle-btn');
-        btn.addEventListener('click', () => {
-            canExtend = !canExtend;
-            btn.textContent = canExtend ? "Span: Enabled" : "Span: Disabled";
-            btn.classList.toggle('disabled', !canExtend);
-        });
+            exteriorEdges = new THREE.Group();
+            scene.add(exteriorEdges);
 
-        window.addEventListener('pointerdown', onPointerDown);
-        window.addEventListener('pointermove', onPointerMove);
-        window.addEventListener('pointerup', onPointerUp);
-        window.addEventListener('resize', onWindowResize);
-    }
+            createHandles();
+            updateCuboid();
 
-    function createHandles() {
-        const handleGeo = new THREE.SphereGeometry(0.5); 
-        const handleMat = new THREE.MeshBasicMaterial({ visible: false });
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.mouseButtons = { LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE };
 
-        const corners = [
-            [1,1,1], [1,1,-1], [1,-1,1], [1,-1,-1],
-            [-1,1,1], [-1,1,-1], [-1,-1,1], [-1,-1,-1]
-        ];
-        corners.forEach(dir => {
-            const handle = new THREE.Mesh(handleGeo, handleMat);
-            handle.userData = { dir: new THREE.Vector3(...dir) };
-            scene.add(handle);
-            handles.push(handle);
-        });
-    }
+            [inputX, inputY, inputZ].forEach(input => {
+                input.addEventListener('input', () => {
+                    size.x = Math.max(1, Math.min(12, parseInt(inputX.value) || 1));
+                    size.y = Math.max(1, Math.min(12, parseInt(inputY.value) || 1));
+                    size.z = Math.max(1, Math.min(12, parseInt(inputZ.value) || 1));
+                    updateCuboid();
+                });
+            });
 
-    function updateCuboid() {
-        barMesh.scale.set(size.x, size.y, size.z);
+            spanBtn.addEventListener('click', () => {
+                canExtend = !canExtend;
+                spanBtn.textContent = canExtend ? "Span: Enabled" : "Span: Disabled";
+                spanBtn.classList.toggle('disabled', !canExtend);
+            });
 
-        while(peanutGroup.children.length > 0) peanutGroup.remove(peanutGroup.children[0]);
-        while(internalGrid.children.length > 0) internalGrid.remove(internalGrid.children[0]);
-        while(exteriorEdges.children.length > 0) exteriorEdges.remove(exteriorEdges.children[0]);
+            window.addEventListener('pointerdown', onPointerDown);
+            window.addEventListener('pointermove', onPointerMove);
+            window.addEventListener('pointerup', onPointerUp);
+            window.addEventListener('resize', onWindowResize);
+        }
 
-        const hX = size.x / 2, hY = size.y / 2, hZ = size.z / 2;
+        // --- ENHANCED WRINKLED DATE GEOMETRY ---
+        function createDateGeometry() {
+            const geo = new THREE.SphereGeometry(0.38, 40, 40);
+            const pos = geo.attributes.position;
+            const v = new THREE.Vector3();
 
-        const peanutGeo = new THREE.SphereGeometry(0.25, 12, 12);
-        const peanutMat = new THREE.MeshPhongMaterial({ color: 0xF5F5DC });
-        
-        for (let i = 0; i < size.x; i++) {
-            for (let j = 0; j < size.y; j++) {
-                for (let k = 0; k < size.z; k++) {
-                    const peanut = new THREE.Mesh(peanutGeo, peanutMat);
-                    peanut.position.set((i - hX + 0.5), (j - hY + 0.5), (k - hZ + 0.5));
-                    peanutGroup.add(peanut);
+            for (let i = 0; i < pos.count; i++) {
+                v.fromBufferAttribute(pos, i);
+
+                // Oblong stretch for Medjool shape
+                v.y *= 1.5;
+
+                const angle = Math.atan2(v.x, v.z);
+
+                // Deep longitudinal ridges matching the photo
+                const ridges = Math.sin(angle * 6.0) * 0.05;
+
+                // Irregular bumpy "organic" noise
+                const bumps = Math.sin(v.y * 12.0) * Math.sin(angle * 10.0) * 0.025;
+
+                // General skin ripple
+                const ripple = Math.cos(v.y * 8.0) * 0.03;
+
+                v.addScaledVector(v, ridges + bumps + ripple);
+
+                pos.setXYZ(i, v.x, v.y, v.z);
+            }
+            geo.computeVertexNormals();
+            return geo;
+        }
+
+        function createHandles() {
+            const handleGeo = new THREE.SphereGeometry(0.5);
+            const handleMat = new THREE.MeshBasicMaterial({ visible: false });
+            const corners = [[1, 1, 1], [1, 1, -1], [1, -1, 1], [1, -1, -1], [-1, 1, 1], [-1, 1, -1], [-1, -1, 1], [-1, -1, -1]];
+            corners.forEach(dir => {
+                const h = new THREE.Mesh(handleGeo, handleMat);
+                h.userData = { dir: new THREE.Vector3(...dir) };
+                scene.add(h);
+                handles.push(h);
+            });
+        }
+
+        function updateCuboid() {
+            inputX.value = size.x; inputY.value = size.y; inputZ.value = size.z;
+            mainMesh.scale.set(size.x, size.y, size.z);
+
+            while (dateGroup.children.length > 0) dateGroup.remove(dateGroup.children[0]);
+            while (internalGrid.children.length > 0) internalGrid.remove(internalGrid.children[0]);
+            while (exteriorEdges.children.length > 0) exteriorEdges.remove(exteriorEdges.children[0]);
+
+            const hX = size.x / 2, hY = size.y / 2, hZ = size.z / 2;
+
+            // CORRECTED: Darker Reddish-Brown Material with High Gloss
+            const dateMat = new THREE.MeshStandardMaterial({
+                color: 0x8b3103,
+                roughness: 0.28,
+                metalness: 0.05,
+                flatShading: false
+            });
+            const dateGeo = createDateGeometry();
+
+            for (let i = 0; i < size.x; i++) {
+                for (let j = 0; j < size.y; j++) {
+                    for (let k = 0; k < size.z; k++) {
+                        const dateFruit = new THREE.Mesh(dateGeo, dateMat);
+                        dateFruit.position.set((i - hX + 0.5), (j - hY + 0.5), (k - hZ + 0.5));
+
+                        // Natural randomness in orientation
+                        dateFruit.rotation.set(Math.random() * 0.2, Math.random() * Math.PI, Math.random() * 0.1);
+                        dateGroup.add(dateFruit);
+                    }
+                }
+            }
+
+            const intLineMat = new THREE.LineBasicMaterial({ color: 0x555555 });
+            const extLineMat = new THREE.LineBasicMaterial({ color: 0x000000 });
+
+            const pts = [];
+            for (let j = -hY; j <= hY; j++) for (let k = -hZ; k <= hZ; k++) pts.push(new THREE.Vector3(-hX, j, k), new THREE.Vector3(hX, j, k));
+            for (let i = -hX; i <= hX; i++) for (let k = -hZ; k <= hZ; k++) pts.push(new THREE.Vector3(i, -hY, k), new THREE.Vector3(i, hY, k));
+            for (let i = -hX; i <= hX; i++) for (let j = -hY; j <= hY; j++) pts.push(new THREE.Vector3(i, j, -hZ), new THREE.Vector3(i, j, hZ));
+
+            internalGrid.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts), intLineMat));
+            exteriorEdges.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(size.x, size.y, size.z)), extLineMat));
+
+            handles.forEach(h => h.position.set(hX * h.userData.dir.x, hY * h.userData.dir.y, hZ * h.userData.dir.z));
+        }
+
+        function onPointerDown(event) {
+            if (event.target.closest('#ui-bar') || event.target.id === 'qr-display') return;
+            pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+            pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(pointer, camera);
+            const intersects = raycaster.intersectObjects(handles);
+            if (intersects.length > 0 && canExtend) {
+                isDraggingHandle = true;
+                activeHandle = intersects[0].object;
+                controls.enabled = false;
+            } else {
+                isDraggingHandle = false;
+                controls.enabled = true;
+            }
+        }
+
+        function onPointerMove(event) {
+            if (!isDraggingHandle || !activeHandle) return;
+            pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+            pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(pointer, camera);
+            const plane = new THREE.Plane().setFromNormalAndCoplanarPoint(camera.getWorldDirection(new THREE.Vector3()), activeHandle.position);
+            const intersectPoint = new THREE.Vector3();
+            if (raycaster.ray.intersectPlane(plane, intersectPoint)) {
+                const nextX = Math.max(1, Math.min(12, Math.round(Math.abs(intersectPoint.x) * 2)));
+                const nextY = Math.max(1, Math.min(12, Math.round(Math.abs(intersectPoint.y) * 2)));
+                const nextZ = Math.max(1, Math.min(12, Math.round(Math.abs(intersectPoint.z) * 2)));
+                if (nextX !== size.x || nextY !== size.y || nextZ !== size.z) {
+                    size.x = nextX; size.y = nextY; size.z = nextZ;
+                    updateCuboid();
                 }
             }
         }
 
-        const intLineMat = new THREE.LineBasicMaterial({ color: 0x555555 }); 
-        const pts = [];
-        for (let j = -hY; j <= hY; j++) for (let k = -hZ; k <= hZ; k++) pts.push(new THREE.Vector3(-hX, j, k), new THREE.Vector3(hX, j, k));
-        for (let i = -hX; i <= hX; i++) for (let k = -hZ; k <= hZ; k++) pts.push(new THREE.Vector3(i, -hY, k), new THREE.Vector3(i, hY, k));
-        for (let i = -hX; i <= hX; i++) for (let j = -hY; j <= hY; j++) pts.push(new THREE.Vector3(i, j, -hZ), new THREE.Vector3(i, j, hZ));
-        
-        const gridGeo = new THREE.BufferGeometry().setFromPoints(pts);
-        internalGrid.add(new THREE.LineSegments(gridGeo, intLineMat));
-
-        const edgeGeo = new THREE.EdgesGeometry(new THREE.BoxGeometry(size.x, size.y, size.z));
-        exteriorEdges.add(new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({ color: 0x000000 })));
-
-        handles.forEach(h => {
-            const d = h.userData.dir;
-            h.position.set(hX * d.x, hY * d.y, hZ * d.z);
-        });
-    }
-
-    function onPointerDown(event) {
-        pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-        pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        raycaster.setFromCamera(pointer, camera);
-        const intersects = raycaster.intersectObjects(handles);
-        
-        if (intersects.length > 0 && canExtend) {
-            isDraggingHandle = true;
-            activeHandle = intersects[0].object;
-            controls.enabled = false; 
-        } else {
-            isDraggingHandle = false;
-            controls.enabled = true; 
-        }
-    }
-
-    function onPointerMove(event) {
-        if (!isDraggingHandle || !activeHandle) return;
-        pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-        pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        raycaster.setFromCamera(pointer, camera);
-        const plane = new THREE.Plane();
-        plane.setFromNormalAndCoplanarPoint(camera.getWorldDirection(new THREE.Vector3()), activeHandle.position);
-        const intersectPoint = new THREE.Vector3();
-        
-        if (raycaster.ray.intersectPlane(plane, intersectPoint)) {
-            // CONSTRAINT LOGIC: Applied min/max boundaries
-            // Clamp value between 1 (min) and 10 (max)
-            const nextX = Math.max(1, Math.min(10, Math.round(Math.abs(intersectPoint.x) * 2)));
-            const nextY = Math.max(1, Math.min(10, Math.round(Math.abs(intersectPoint.y) * 2)));
-            const nextZ = Math.max(1, Math.min(10, Math.round(Math.abs(intersectPoint.z) * 2)));
-
-            if (nextX !== size.x || nextY !== size.y || nextZ !== size.z) {
-                size.x = nextX;
-                size.y = nextY;
-                size.z = nextZ;
-                updateCuboid();
-            }
-        }
-    }
-
-    function onPointerUp() {
-        isDraggingHandle = false;
-        activeHandle = null;
-        controls.enabled = true; 
-    }
-
-    function onWindowResize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    }
-
-    function animate() {
-        requestAnimationFrame(animate);
-        controls.update(); 
-        renderer.render(scene, camera);
-    }
-</script>
+        function onPointerUp() { isDraggingHandle = false; activeHandle = null; controls.enabled = true; }
+        function onWindowResize() { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); }
+        function animate() { requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); }
+    </script>
 </body>
-</html>```
+
+</html>
