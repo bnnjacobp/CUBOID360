@@ -73,7 +73,7 @@
 
         /* Collapsible Section */
         #collapsible-content {
-            max-height: 500px; /* Max height when open */
+            max-height: 550px; 
             transition: max-height 0.4s ease-out, opacity 0.3s;
             overflow-y: auto;
             padding: 0 20px;
@@ -138,40 +138,40 @@
     <div id="pointers-container">
         <!-- HEADER (Always Visible & Clickable) -->
         <div id="box-header" onclick="document.getElementById('pointers-container').classList.toggle('minimized')">
-            <span>Exploration Tasks</span>
-            <small style="font-weight: normal; color: #888;">(Tap to minimize questions)</small>
+            <span>Concept Exploration</span>
+            <small style="font-weight: normal; color: #888;">(Tap to Toggle)</small>
         </div>
         
-        <!-- QUESTIONS (Minimize-able) -->
+        <!-- QUESTIONS (Simplified) -->
         <div id="collapsible-content">
             <div class="pointer-item">
-                <h3>1. The Sides of One Flat Layer of a Cuboid</h3>
-                Breads are sliced in the shape of cubes. When you look at one flat layer of cuboid (like cubes of the bottom of the box), what does the number of cubes along one side tell you? How is it like the length of that layer? What about the number of cubes along the other side—how is it like the breadth (or width)?
+                <h3>1. Length and Breadth</h3>
+                Count the cubes along the edges of the bottom layer. How do these numbers match the <b>Length</b> and <b>Breadth</b> of the box?
             </div>
 
             <div class="pointer-item">
-                <h3>2. All the Cubes in One Flat Layer of a Cuboid</h3>
-                How many cubes are there in that single flat layer? Did you find that number by multiplying the length and the breadth? This number is called the area of the base. If the layer was 1 cube thick, this number would also be its volume.
+                <h3>2. The Base Area</h3>
+                How many unit cubes are in one flat layer? If you multiply Length × Breadth, do you get this same total? This is called the <b>Base Area</b>.
             </div>
 
             <div class="pointer-item">
-                <h3>3. Stacking the Layers Up</h3>
-                How many of these flat layers are stacked on top of each other to make the whole box? How is this number the same as the height of the box?
+                <h3>3. Stacking for Height</h3>
+                How many layers are stacked on top of each other? Relate this count to the <b>Height</b> of the entire box.
             </div>
 
             <div class="pointer-item">
-                <h3>4. All the Cubes in the Whole Box</h3>
-                What is the total number of cubes in the entire box? This total number is called the volume of the box. How did you find it?
+                <h3>4. Finding the Volume</h3>
+                What is the total number of unit cubes in the entire box? This total is the <b>Volume</b>. Can you calculate it by multiplying: Base Area × Height?
             </div>
 
             <div class="pointer-item">
-                <h3>5. A Division Puzzle (Part 1)</h3>
-                If you take the total volume of the box and divide it by the number of cubes in its bottom layer, what answer do you get? What is another name for that answer?
+                <h3>5. Working Backward (Part 1)</h3>
+                If you take the Total Volume and divide it by the number of cubes in the bottom layer (Base Area), do you obtain the <b>Height</b>?
             </div>
 
             <div class="pointer-item" style="margin-bottom: 20px;">
-                <h3>6. A Division Puzzle (Part 2)</h3>
-                If you take the total volume of the box and divide it by its height, what answer do you get? Is this the number of cubes in just one layer? What else can you call this number?
+                <h3>6. Working Backward (Part 2)</h3>
+                If you divide the Total Volume by the box's Height, do you obtain the number of cubes in just one layer (the <b>Base Area</b>)?
             </div>
         </div>
 
@@ -193,7 +193,7 @@
             "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
         }
     }
-    </script>
+</script>
 
     <script type="module">
         import * as THREE from 'three';
@@ -215,7 +215,6 @@
         function init() {
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0xfcfcfc);
-
             camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
             camera.position.set(16, 12, 18);
 
@@ -229,17 +228,10 @@
             scene.add(light);
             scene.add(new THREE.AmbientLight(0xffffff, 0.8));
 
-            breadGroup = new THREE.Group();
-            scene.add(breadGroup);
-
-            acrylicMesh = new THREE.Mesh(
-                new THREE.BoxGeometry(1, 1, 1),
-                new THREE.MeshPhongMaterial({ color: 0xeeeeee, transparent: true, opacity: 0.1, shininess: 100 })
-            );
+            breadGroup = new THREE.Group(); scene.add(breadGroup);
+            acrylicMesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshPhongMaterial({ color: 0xeeeeee, transparent: true, opacity: 0.1, shininess: 100 }));
             scene.add(acrylicMesh);
-
-            exteriorEdges = new THREE.Group();
-            scene.add(exteriorEdges);
+            exteriorEdges = new THREE.Group(); scene.add(exteriorEdges);
 
             createHandles();
             updateCuboid();
@@ -249,82 +241,60 @@
             controls.mouseButtons = { LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE };
             controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
 
-            window.addEventListener('pointerdown', onPointerDown);
-            window.addEventListener('pointermove', onPointerMove);
-            window.addEventListener('pointerup', onPointerUp);
-            window.addEventListener('resize', onWindowResize);
+            window.addEventListener('pointerdown', (e) => {
+                if (e.target.closest('#pointers-container') || e.target.id === 'qr-display') return;
+                pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+                pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
+                raycaster.setFromCamera(pointer, camera);
+                const hits = raycaster.intersectObjects(handles);
+                if (hits.length > 0) { isDraggingHandle = true; activeHandle = hits[0].object; controls.enabled = false; }
+                else { isDraggingHandle = false; controls.enabled = true; }
+            });
+
+            window.addEventListener('pointermove', (e) => {
+                if (!isDraggingHandle || !activeHandle) return;
+                pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+                pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
+                raycaster.setFromCamera(pointer, camera);
+                const pt = new THREE.Vector3();
+                raycaster.ray.intersectPlane(new THREE.Plane().setFromNormalAndCoplanarPoint(camera.getWorldDirection(new THREE.Vector3()), activeHandle.position), pt);
+                const ny = Math.max(1, Math.min(4, Math.round(Math.abs(pt.y) * 2)));
+                if (ny !== size.y) { size.y = ny; updateCuboid(); }
+            });
+
+            window.addEventListener('pointerup', () => { isDraggingHandle = false; activeHandle = null; controls.enabled = true; });
+            window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
         }
 
         function createHandles() {
-            const handleGeo = new THREE.SphereGeometry(0.5);
-            const handleMat = new THREE.MeshBasicMaterial({ visible: false });
+            const hGeo = new THREE.SphereGeometry(0.5);
+            const hMat = new THREE.MeshBasicMaterial({ visible: false });
             const corners = [[1,1,1],[1,1,-1],[1,-1,1],[1,-1,-1],[-1,1,1],[-1,1,-1],[-1,-1,1],[-1,-1,-1]];
             corners.forEach(dir => {
-                const handle = new THREE.Mesh(handleGeo, handleMat);
-                handle.userData = { dir: new THREE.Vector3(...dir) };
-                scene.add(handle);
-                handles.push(handle);
+                const handle = new THREE.Mesh(hGeo, hMat); handle.userData = { dir: new THREE.Vector3(...dir) };
+                scene.add(handle); handles.push(handle);
             });
         }
 
         function updateCuboid() {
             while (breadGroup.children.length > 0) breadGroup.remove(breadGroup.children[0]);
             while (exteriorEdges.children.length > 0) exteriorEdges.remove(exteriorEdges.children[0]);
-
-            const crustMat = new THREE.MeshPhongMaterial({ color: 0xcd853f });
-            const crumbMat = new THREE.MeshPhongMaterial({ color: 0xf5f5dc });
-            const materials = [crumbMat, crumbMat, crustMat, crustMat, crumbMat, crumbMat];
-
-            const startX = -(size.x / 2) + 0.5;
-            const startY = -(size.y / 2) + 0.5;
-            const startZ = -(size.z / 2) + 0.5;
-
+            const mats = [new THREE.MeshPhongMaterial({ color: 0xf5f5dc }), new THREE.MeshPhongMaterial({ color: 0xf5f5dc }), new THREE.MeshPhongMaterial({ color: 0xcd853f }), new THREE.MeshPhongMaterial({ color: 0xcd853f }), new THREE.MeshPhongMaterial({ color: 0xf5f5dc }), new THREE.MeshPhongMaterial({ color: 0xf5f5dc })];
+            const startX = -(size.x/2)+0.5, startY = -(size.y/2)+0.5, startZ = -(size.z/2)+0.5;
             for (let i = 0; i < size.x; i++) {
                 for (let j = 0; j < size.y; j++) {
                     for (let k = 0; k < size.z; k++) {
-                        const cube = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.95, 0.95), materials);
-                        cube.position.set(startX + i, startY + j, startZ + k);
-                        breadGroup.add(cube);
+                        const cube = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.95, 0.95), mats);
+                        cube.position.set(startX+i, startY+j, startZ+k); breadGroup.add(cube);
                     }
                 }
             }
-
             acrylicMesh.scale.set(size.x, size.y, size.z);
-            exteriorEdges.add(new THREE.LineSegments(
-                new THREE.EdgesGeometry(new THREE.BoxGeometry(size.x, size.y, size.z)),
-                new THREE.LineBasicMaterial({ color: 0x333333 })
-            ));
-
-            const hX = size.x / 2, hY = size.y / 2, hZ = size.z / 2;
-            handles.forEach(h => h.position.set(hX * h.userData.dir.x, hY * h.userData.dir.y, hZ * h.userData.dir.z));
+            exteriorEdges.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(size.x,size.y,size.z)), new THREE.LineBasicMaterial({ color: 0x333333 })));
+            const hX = size.x/2, hY = size.y/2, hZ = size.z/2;
+            handles.forEach(h => h.position.set(hX*h.userData.dir.x, hY*h.userData.dir.y, hZ*h.userData.dir.z));
         }
 
-        function onPointerDown(e) {
-            if (e.target.closest('#pointers-container') || e.target.id === 'qr-display') return;
-
-            pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
-            pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
-            raycaster.setFromCamera(pointer, camera);
-            const hits = raycaster.intersectObjects(handles);
-            if (hits.length > 0) { isDraggingHandle = true; activeHandle = hits[0].object; controls.enabled = false; }
-            else { isDraggingHandle = false; controls.enabled = true; }
-        }
-
-        function onPointerMove(e) {
-            if (!isDraggingHandle || !activeHandle) return;
-            pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
-            pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
-            raycaster.setFromCamera(pointer, camera);
-            const plane = new THREE.Plane().setFromNormalAndCoplanarPoint(camera.getWorldDirection(new THREE.Vector3()), activeHandle.position);
-            const pt = new THREE.Vector3();
-            if (raycaster.ray.intersectPlane(plane, pt)) {
-                const ny = Math.max(1, Math.min(4, Math.round(Math.abs(pt.y) * 2)));
-                if (ny !== size.y) { size.y = ny; updateCuboid(); }
-            }
-        }
-
-        function onPointerUp() { isDraggingHandle = false; activeHandle = null; controls.enabled = true; }
-        function onWindowResize() { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); }
         function animate() { requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); }
     </script>
 </body>
