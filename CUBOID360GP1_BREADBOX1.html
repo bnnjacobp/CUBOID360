@@ -20,47 +20,103 @@
 
         #main-header {
             position: absolute;
-            top: 20px;
+            top: 15px;
             width: 100%;
             text-align: center;
             padding: 0 20px;
             box-sizing: border-box;
-            font-size: clamp(18px, 2.5vw, 24px);
+            font-size: clamp(16px, 2.2vw, 22px);
             font-weight: bold;
             color: #3e2723;
             z-index: 10;
             pointer-events: none;
         }
 
+        /* --- UI Box Layout --- */
         #pointers-container {
             position: absolute;
-            top: 100px;
+            top: 70px;
             left: 20px;
-            max-width: 480px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 20px;
+            width: 450px;
+            background: rgba(255, 255, 255, 0.95);
             border-left: 5px solid #8d6e63;
             border-radius: 4px;
-            z-index: 10;
-            pointer-events: none;
+            z-index: 20;
             box-shadow: 2px 2px 15px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #box-header {
+            padding: 12px 20px;
+            background: #f1edea;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            font-weight: bold;
+            color: #3e2723;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #box-header:after {
+            content: '▲';
+            font-size: 10px;
+            transition: transform 0.3s;
+        }
+
+        #pointers-container.minimized #box-header:after {
+            transform: rotate(180deg);
+        }
+
+        /* Collapsible Section */
+        #collapsible-content {
+            max-height: 500px; /* Max height when open */
+            transition: max-height 0.4s ease-out, opacity 0.3s;
+            overflow-y: auto;
+            padding: 0 20px;
+        }
+
+        #pointers-container.minimized #collapsible-content {
+            max-height: 0;
+            opacity: 0;
+            padding: 0 20px;
+        }
+
+        /* Instruction - ALWAYS VISIBLE */
+        #fixed-footer {
+            padding: 15px 20px;
+            border-top: 1px solid #eee;
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .instruction-text {
+            color: #757575;
+            font-style: italic;
+            font-size: 13px;
+            line-height: 1.4;
         }
 
         .pointer-item {
-            margin-bottom: 12px;
-            font-size: clamp(13px, 1.5vw, 15px);
-            line-height: 1.4;
+            margin: 20px 0;
+            font-size: 13.5px;
+            line-height: 1.5;
             color: #4e342e;
-            font-weight: 500;
         }
 
-        /* Fixed QR code styling */
+        .pointer-item h3 {
+            margin: 0 0 5px 0;
+            font-size: 14px;
+            color: #8d6e63;
+        }
+
         #qr-display {
             position: absolute;
             bottom: 20px;
             right: 20px;
             width: 150px;
-            /* Slightly larger for visibility */
             height: auto;
             background: white;
             padding: 8px;
@@ -68,7 +124,6 @@
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             z-index: 1000;
-            /* Ensure it stays on top of everything */
         }
     </style>
 </head>
@@ -81,18 +136,50 @@
     </div>
 
     <div id="pointers-container">
-        <div class="pointer-item">• What is the dimension (length × breadth) of the base layer?</div>
-        <div class="pointer-item">• What does the number of unit cubes on each side of a layer represent? Compare it with the length and the breadth of a layer.</div>
-        <div class="pointer-item">• What does the number of unit cubes in each layer represent? Have you obtained it by multiplying the length and the breadth of a layer? Compare it with the area of the layer.</div>
-        <div class="pointer-item">• What does the number of layers represent? Compare it with the height of the cuboid.</div>
-        <div class="pointer-item">• What does the total number of unit cubes in all the layers together represent? Compare it with the volume of the cuboid.</div>
-        <div class="pointer-item">• What do you obtain when you divide the volume of the cuboid by the surface area of
-            its base layer? Is it the number of layers? What can you call it otherwise?</div>
-        <div class="pointer-item">• What do you obtain when you divide the volume of the cuboid by its height? Is it the number of unit cubes in one layer? What can you call it otherwise?</div>
+        <!-- HEADER (Always Visible & Clickable) -->
+        <div id="box-header" onclick="document.getElementById('pointers-container').classList.toggle('minimized')">
+            <span>Exploration Tasks</span>
+            <small style="font-weight: normal; color: #888;">(Tap to minimize questions)</small>
+        </div>
+        
+        <!-- QUESTIONS (Minimize-able) -->
+        <div id="collapsible-content">
+            <div class="pointer-item">
+                <h3>1. The Sides of One Flat Layer of a Cuboid</h3>
+                Breads are sliced in the shape of cubes. When you look at one flat layer of cuboid (like cubes of the bottom of the box), what does the number of cubes along one side tell you? How is it like the length of that layer? What about the number of cubes along the other side—how is it like the breadth (or width)?
+            </div>
 
-        <div
-            style="margin-top: 15px; color: #757575; font-style: italic; border-top: 1px solid #eee; padding-top: 10px; font-size: 14px;">
-            Use hand gestures to rotate and span the cuboid while exploring these concepts
+            <div class="pointer-item">
+                <h3>2. All the Cubes in One Flat Layer of a Cuboid</h3>
+                How many cubes are there in that single flat layer? Did you find that number by multiplying the length and the breadth? This number is called the area of the base. If the layer was 1 cube thick, this number would also be its volume.
+            </div>
+
+            <div class="pointer-item">
+                <h3>3. Stacking the Layers Up</h3>
+                How many of these flat layers are stacked on top of each other to make the whole box? How is this number the same as the height of the box?
+            </div>
+
+            <div class="pointer-item">
+                <h3>4. All the Cubes in the Whole Box</h3>
+                What is the total number of cubes in the entire box? This total number is called the volume of the box. How did you find it?
+            </div>
+
+            <div class="pointer-item">
+                <h3>5. A Division Puzzle (Part 1)</h3>
+                If you take the total volume of the box and divide it by the number of cubes in its bottom layer, what answer do you get? What is another name for that answer?
+            </div>
+
+            <div class="pointer-item" style="margin-bottom: 20px;">
+                <h3>6. A Division Puzzle (Part 2)</h3>
+                If you take the total volume of the box and divide it by its height, what answer do you get? Is this the number of cubes in just one layer? What else can you call this number?
+            </div>
+        </div>
+
+        <!-- INSTRUCTION (Always Visible) -->
+        <div id="fixed-footer">
+            <div class="instruction-text">
+                Use hand gestures to rotate and span the cuboid while exploring these concepts
+            </div>
         </div>
     </div>
 
@@ -171,7 +258,7 @@
         function createHandles() {
             const handleGeo = new THREE.SphereGeometry(0.5);
             const handleMat = new THREE.MeshBasicMaterial({ visible: false });
-            const corners = [[1, 1, 1], [1, 1, -1], [1, -1, 1], [1, -1, -1], [-1, 1, 1], [-1, 1, -1], [-1, -1, 1], [-1, -1, -1]];
+            const corners = [[1,1,1],[1,1,-1],[1,-1,1],[1,-1,-1],[-1,1,1],[-1,1,-1],[-1,-1,1],[-1,-1,-1]];
             corners.forEach(dir => {
                 const handle = new THREE.Mesh(handleGeo, handleMat);
                 handle.userData = { dir: new THREE.Vector3(...dir) };
@@ -213,8 +300,7 @@
         }
 
         function onPointerDown(e) {
-            // Check if clicking QR code to allow saving it
-            if (e.target.id === 'qr-display') return;
+            if (e.target.closest('#pointers-container') || e.target.id === 'qr-display') return;
 
             pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
             pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
