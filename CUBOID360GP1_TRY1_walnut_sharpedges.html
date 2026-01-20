@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>3D Walnut Packet - Curvy Shadow UI</title>
+    <title>3D Walnut Packet - Think-Pair-Share</title>
     <style>
         body {
             margin: 0;
@@ -18,68 +18,90 @@
             display: block;
         }
 
-        /* --- UPDATED UI: CURVY CORNERS + SHADOW + SIDE PANEL --- */
+        /* --- UI CONTAINER: CURVY CORNERS + SHADOW + SIDE PANEL --- */
         #ui-container {
             position: absolute;
             top: 20px;
             left: 20px;
-            max-width: 500px;
-            /* Semi-transparent white background to host the shadow */
-            background: rgba(255, 255, 255, 0.9);
-            padding: 20px 25px;
-            pointer-events: none;
+            width: 450px;
+            background: rgba(255, 255, 255, 0.95);
+            pointer-events: auto; /* Changed to auto to allow clicking the header */
             z-index: 10;
-
-            /* Curvy Corners */
             border-radius: 15px;
-
-            /* The required Side Panel (Deep Walnut Brown) */
-            border-left: 6px solid #5d4037;
-
-            /* Shadow Design exactly as in Breadbox */
+            border-left: 6px solid #5d4037; /* Side Panel */
             box-shadow: 2px 2px 15px rgba(0, 0, 0, 0.08);
             user-select: none;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #info-box-header {
+            padding: 12px 20px;
+            background: rgba(160, 82, 45, 0.1);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         #primary-title {
-            font-size: 36px;
+            font-size: 22px;
             font-weight: 900;
-            /* Sienna Brown Color for "Try it!" */
             color: #a0522d;
-            margin-bottom: 5px;
-            display: block;
-            letter-spacing: -1px;
+            margin: 0;
+            letter-spacing: -0.5px;
         }
 
-        #main-heading {
-            font-size: 15.5px;
-            font-weight: 700;
-            color: #3e2723;
-            /* Dark Cocoa Brown */
-            line-height: 1.5;
-            margin-bottom: 18px;
+        #info-box-header:after {
+            content: '▲';
+            font-size: 10px;
+            color: #a0522d;
+            transition: transform 0.3s;
         }
 
-        .pointer-item {
+        #ui-container.minimized #info-box-header:after {
+            transform: rotate(180deg);
+        }
+
+        /* Collapsible Section for Questions */
+        #collapsible-content {
+            padding: 0 25px;
+            max-height: 500px;
+            overflow-y: auto;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
+        }
+
+        #ui-container.minimized #collapsible-content {
+            max-height: 0;
+            opacity: 0;
+        }
+
+        .question-item {
             font-size: 14.5px;
-            color: #4e342e;
-            /* Warm Medium Brown */
-            margin-bottom: 10px;
-            display: list-item;
-            list-style-type: disc;
-            margin-left: 25px;
-            line-height: 1.4;
+            color: #3e2723;
+            margin: 15px 0;
+            line-height: 1.5;
+            font-weight: 600;
+        }
+
+        .question-number {
+            color: #a0522d;
+            margin-right: 5px;
+        }
+
+        /* Fixed Instruction Section (Always Visible) */
+        #fixed-footer {
+            padding: 15px 25px;
+            background: white;
+            border-top: 1px solid #eee;
         }
 
         #gesture-instruction {
             font-size: 13px;
             color: #757575;
-            /* Grey */
             font-style: italic;
-            /* Italics */
-            margin-top: 15px;
-            border-top: 1px solid #eee;
-            padding-top: 10px;
+            margin: 0;
         }
 
         /* QR Code Styling */
@@ -102,17 +124,24 @@
 <body>
 
     <div id="ui-container">
-        <span id="primary-title">Try it!</span>
-        <div id="main-heading">
-            This is a model of a packet of walnuts in the shape of a cuboid. Count the number of walnuts in each layer
-            and multiply it by the number of layers to answer the following questions:
+        <!-- Tapping this header minimizes the questions -->
+        <div id="info-box-header" onclick="document.getElementById('ui-container').classList.toggle('minimized')">
+            <span id="primary-title">🤔 Think–Pair–Share Questions</span>
         </div>
-        <div class="pointer-item">What does the number of walnuts in each layer represent? Compare it with the surface area of one layer.</div>
-        <div class="pointer-item">What does the number of layers represent? Compare it with the height of the cuboid.</div>
-        <div class="pointer-item">What does the total number of walnuts in all the layers together represent? Compare it with the volume of the cuboid.</div>
 
-        <div id="gesture-instruction">
-            Use hand gestures to rotate and span the cuboid while exploring these concepts
+        <div id="collapsible-content">
+            <div class="question-item"><span class="question-number">1.</span> How many cube boxes are there in one layer of the cuboid? How did you find it?</div>
+            <div class="question-item"><span class="question-number">2.</span> How many layers are stacked in the cuboid, and what does this represent?</div>
+            <div class="question-item"><span class="question-number">3.</span> Without counting one by one, how can you find the total number of cube boxes inside the cuboid?</div>
+            <div class="question-item"><span class="question-number">4.</span> What is the volume of the cuboid?</div>
+            <div class="question-item"><span class="question-number">5.</span> Write the formula to find the volume of a cuboid.</div>
+        </div>
+
+        <!-- Instructions remain visible always -->
+        <div id="fixed-footer">
+            <p id="gesture-instruction">
+                Use hand gestures to rotate and span the cuboid while exploring these concepts
+            </p>
         </div>
     </div>
 
@@ -252,6 +281,9 @@
         }
 
         function onPointerDown(e) {
+            // Block 3D actions if clicking inside the UI panel
+            if (e.target.closest('#ui-container') || e.target.id === 'qr-code') return;
+
             pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
             pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
             raycaster.setFromCamera(pointer, camera);
