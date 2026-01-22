@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>UAE Culture: Box of Dates - Volume Explorer</title>
+    <title>UAE Culture: Box of Dates - Axis Spanning</title>
     <style>
         body {
             margin: 0;
@@ -35,9 +35,9 @@
         /* --- Side Panel Textbox (Top Left) --- */
         #info-box {
             position: absolute;
-            top: 30px; /* Shifted up as requested */
+            top: 30px; 
             left: 20px;
-            width: 420px; /* Fixed width */
+            width: 420px; 
             background: rgba(255, 255, 255, 0.95);
             border-left: 8px solid #D2691E;
             border-radius: 15px;
@@ -51,7 +51,7 @@
         }
 
         #info-box.minimized {
-            max-height: 42px; /* Only header height */
+            max-height: 42px;
         }
 
         #info-box-header {
@@ -65,8 +65,8 @@
         }
 
         #info-box-header:after {
-            content: '▲';
-            font-size: 10px;
+            content: '▼';
+            font-size: 12px;
             color: #D2691E;
             transition: transform 0.3s;
         }
@@ -82,7 +82,6 @@
             text-transform: uppercase;
         }
 
-        /* Collapsible Section */
         #collapsible-content {
             padding: 0 20px;
             overflow-y: auto;
@@ -114,7 +113,6 @@
             margin-bottom: 12px;
             font-size: 13px;
             color: #3B2314;
-            line-height: 1.4;
         }
 
         .question-text {
@@ -126,11 +124,13 @@
             border-left: 2px solid #ecdac6;
         }
 
-        /* Fixed Instruction Footer (Always Visible) */
-        #fixed-instruction-footer {
-            padding: 12px 20px;
-            background: #fff;
-            border-top: 1px solid #eee;
+        /* --- FIXED INSTRUCTIONS AT BOTTOM LEFT --- */
+        #bottom-instructions {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 10;
+            pointer-events: none;
         }
 
         .instruction-line {
@@ -138,12 +138,8 @@
             font-size: 12px;
             color: #757575;
             font-style: italic;
-            line-height: 1.4;
-            margin-bottom: 6px;
-            text-align: left;
+            line-height: 1.6;
         }
-
-        .instruction-line:last-child { margin-bottom: 0; }
 
         /* --- Bottom UI Bar --- */
         #ui-bar-bottom {
@@ -153,11 +149,11 @@
             transform: translateX(-50%);
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 10px;
             background: rgba(255, 255, 255, 0.95);
             padding: 10px 20px;
             border-radius: 50px;
-            box-shadow: 0 4px 15px rgba(0, 136, 255, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
             z-index: 100;
             border: 1px solid #ddd;
         }
@@ -165,45 +161,49 @@
         .input-group {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 3px;
             font-weight: bold;
             color: #3B2314;
-            font-size: 14px;
+            font-size: 13px;
         }
 
         .dimension-input {
-            width: 40px;
-            padding: 5px;
+            width: 35px;
+            padding: 4px;
             border: 1px solid #ccc;
             border-radius: 5px;
             text-align: center;
+            font-size: 14px;
         }
 
-        #toggle-btn {
-            padding: 10px 20px;
-            font-size: 14px;
+        .control-btn {
+            padding: 8px 14px;
+            font-size: 12px;
             font-weight: bold;
             color: white;
             background-color: #0088ff;
             border: none;
-            border-radius: 25px;
+            border-radius: 20px;
             cursor: pointer;
             transition: all 0.3s ease;
+            user-select: none;
+            white-space: nowrap;
         }
 
-        #toggle-btn.disabled { background-color: #555555; }
+        .control-btn.disabled { background-color: #555555; }
 
+        /* --- QR Code Styling --- */
         #qr-display {
             position: absolute;
             bottom: 20px;
             right: 20px;
-            width: 120px;
-            height: 120px;
+            width: 130px;
+            height: 130px;
             background: white;
             padding: 5px;
             border: 1px solid #ddd;
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
             z-index: 100;
         }
     </style>
@@ -217,56 +217,45 @@
         <div id="info-box-header" onclick="document.getElementById('info-box').classList.toggle('minimized')">
             <span class="header-title">Instructions & Tasks</span>
         </div>
-        
         <div id="collapsible-content">
             <div id="description">
-                This is a model of a box of balls with dates and nuts, commonly shared in the UAE during Islamic occasions, in the shape of a cuboid.
+                This is a model of a box of balls with dates and nuts, commonly shared in the UAE during Islamic occasions such as Ramadan, Eid, and family gatherings, in the shape of a cuboid.
             </div>
-
             <span class="think-title">Think and Answer</span>
-            
             <div class="think-group">
                 Look at just one flat layer of balls.
                 <span class="question-text">What does the number of balls tell you? Is it same as Area (L×B)?</span>
             </div>
-
             <div class="think-group">
                 Look at how the layers are stacked.
                 <span class="question-text">What does the number of layers tell you? Is it same as Height?</span>
             </div>
-
             <div class="think-group">
                 Now, think about the whole box.
                 <span class="question-text">What does the total number of balls tell you? Is it same as Volume?</span>
             </div>
-
-            <div class="think-group">
-                Division 1: Total balls ÷ layers.
-                <span class="question-text">What is the result? Is it same as Volume ÷ Height?</span>
-            </div>
-
-            <div class="think-group" style="margin-bottom: 20px;">
-                Division 2: Total balls ÷ balls in one layer.
-                <span class="question-text">What is the result? Is it same as Volume ÷ Base Area?</span>
-            </div>
         </div>
+    </div>
 
-        <div id="fixed-instruction-footer">
-            <span class="instruction-line">The interactive cuboid on the right can be expanded up to a dimension of 12×12×12</span>
-            <span class="instruction-line">Use hand gestures to rotate and span the cuboid while exploring these concepts.</span>
-            <span class="instruction-line">Use the input boxes to enter the length, breadth, and height of the required cuboid.</span>
-            <span class="instruction-line">Disable the “Span” button to prevent accidental changes to the dimensions.</span>
-        </div>
+    <div id="bottom-instructions">
+        <span class="instruction-line"><i>Use hand gestures to rotate and span the cuboid while exploring these concepts.</i></span>
+        <span class="instruction-line"><i>Use the input boxes to enter the length, breadth, and height of the required cuboid.</i></span>
+        <span class="instruction-line"><i>Disable the Span buttons to prevent accidental changes to the dimensions.</i></span>
     </div>
 
     <div id="ui-bar-bottom">
         <div class="input-group"><label>L:</label><input type="number" id="input-l" class="dimension-input" min="1" max="12" value="1"></div>
         <div class="input-group"><label>B:</label><input type="number" id="input-b" class="dimension-input" min="1" max="12" value="1"></div>
         <div class="input-group"><label>H:</label><input type="number" id="input-h" class="dimension-input" min="1" max="12" value="1"></div>
-        <button id="toggle-btn">Span: Enabled</button>
+        
+        <button id="btn-l" class="control-btn">L-Span: On</button>
+        <button id="btn-b" class="control-btn">B-Span: On</button>
+        <button id="btn-h" class="control-btn">H-Span: On</button>
+        <button id="toggle-btn" class="control-btn">Span: Enabled</button>
     </div>
 
-    <img id="qr-display" src="qr.png" alt="Scan QR Code" onerror="this.style.display='none'">
+    <!-- QR CODE AT BOTTOM RIGHT -->
+    <img id="qr-display" src="BOX12×12×12qr.png" alt="Scan QR Code" onerror="this.style.display='none'">
 
     <script type="importmap">
     {
@@ -275,7 +264,7 @@
             "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
         }
     }
-</script>
+    </script>
 
     <script type="module">
         import * as THREE from 'three';
@@ -285,7 +274,8 @@
         let barMesh, internalGrid, exteriorEdges, peanutGroup;
         let handles = [];
         let size = { x: 1, y: 1, z: 1 };
-        let canExtend = true;
+        
+        let locks = { l: true, b: true, h: true, global: true };
 
         const raycaster = new THREE.Raycaster();
         const pointer = new THREE.Vector2();
@@ -295,7 +285,10 @@
         const inputL = document.getElementById('input-l');
         const inputB = document.getElementById('input-b');
         const inputH = document.getElementById('input-h');
-        const btnToggle = document.getElementById('toggle-btn');
+        const btnL = document.getElementById('btn-l');
+        const btnB = document.getElementById('btn-b');
+        const btnH = document.getElementById('btn-h');
+        const btnGlobal = document.getElementById('toggle-btn');
 
         init();
         animate();
@@ -331,11 +324,27 @@
             controls.mouseButtons = { LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE };
             controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
 
-            btnToggle.addEventListener('click', () => {
-                canExtend = !canExtend;
-                btnToggle.textContent = canExtend ? "Span: Enabled" : "Span: Disabled";
-                btnToggle.classList.toggle('disabled', !canExtend);
-            });
+            // UI Listeners
+            btnGlobal.onclick = () => {
+                locks.global = !locks.global;
+                btnGlobal.textContent = locks.global ? "Span: Enabled" : "Span: Disabled";
+                btnGlobal.classList.toggle('disabled', !locks.global);
+            };
+            btnL.onclick = () => {
+                locks.l = !locks.l;
+                btnL.textContent = locks.l ? "L-Span: On" : "L-Span: Off";
+                btnL.classList.toggle('disabled', !locks.l);
+            };
+            btnB.onclick = () => {
+                locks.b = !locks.b;
+                btnB.textContent = locks.b ? "B-Span: On" : "B-Span: Off";
+                btnB.classList.toggle('disabled', !locks.b);
+            };
+            btnH.onclick = () => {
+                locks.h = !locks.h;
+                btnH.textContent = locks.h ? "H-Span: On" : "H-Span: Off";
+                btnH.classList.toggle('disabled', !locks.h);
+            };
 
             const onInputChange = () => {
                 size.x = Math.max(1, Math.min(12, parseInt(inputL.value) || 1));
@@ -343,17 +352,15 @@
                 size.y = Math.max(1, Math.min(12, parseInt(inputH.value) || 1));
                 updateCuboid();
             };
-            inputL.addEventListener('input', onInputChange);
-            inputB.addEventListener('input', onInputChange);
-            inputH.addEventListener('input', onInputChange);
+            inputL.oninput = inputB.oninput = inputH.oninput = onInputChange;
 
             window.addEventListener('pointerdown', (e) => {
-                if (e.target.closest('#toggle-btn') || e.target.closest('#info-box') || e.target.closest('#ui-bar-bottom')) return;
+                if (e.target.closest('#ui-bar-bottom') || e.target.id === 'qr-display' || e.target.closest('#info-box')) return;
                 pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
                 pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
                 raycaster.setFromCamera(pointer, camera);
                 const intersects = raycaster.intersectObjects(handles);
-                if (intersects.length > 0 && canExtend) { isDraggingHandle = true; activeHandle = intersects[0].object; controls.enabled = false; }
+                if (intersects.length > 0 && locks.global) { isDraggingHandle = true; activeHandle = intersects[0].object; controls.enabled = false; }
                 else { isDraggingHandle = false; controls.enabled = true; }
             });
 
@@ -364,13 +371,20 @@
                 raycaster.setFromCamera(pointer, camera);
                 const pt = new THREE.Vector3();
                 raycaster.ray.intersectPlane(new THREE.Plane().setFromNormalAndCoplanarPoint(camera.getWorldDirection(new THREE.Vector3()), activeHandle.position), pt);
-                const nx = Math.max(1, Math.min(12, Math.round(Math.abs(pt.x) * 2)));
-                const ny = Math.max(1, Math.min(12, Math.round(Math.abs(pt.y) * 2)));
-                const nz = Math.max(1, Math.min(12, Math.round(Math.abs(pt.z) * 2)));
-                if (nx !== size.x || ny !== size.y || nz !== size.z) { size.x = nx; size.y = ny; size.z = nz; updateCuboid(); }
+                
+                let nx = size.x, ny = size.y, nz = size.z;
+                if (locks.l) nx = Math.max(1, Math.min(12, Math.round(Math.abs(pt.x) * 2)));
+                if (locks.h) ny = Math.max(1, Math.min(12, Math.round(Math.abs(pt.y) * 2)));
+                if (locks.b) nz = Math.max(1, Math.min(12, Math.round(Math.abs(pt.z) * 2)));
+
+                if (nx !== size.x || ny !== size.y || nz !== size.z) {
+                    size.x = nx; size.y = ny; size.z = nz;
+                    updateCuboid();
+                }
             });
 
             window.addEventListener('pointerup', () => { isDraggingHandle = false; activeHandle = null; controls.enabled = true; });
+            window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
         }
 
         function createHandles() {
@@ -389,13 +403,15 @@
             while (peanutGroup.children.length > 0) peanutGroup.remove(peanutGroup.children[0]);
             while (internalGrid.children.length > 0) internalGrid.remove(internalGrid.children[0]);
             while (exteriorEdges.children.length > 0) exteriorEdges.remove(exteriorEdges.children[0]);
+            
             const hX = size.x / 2, hY = size.y / 2, hZ = size.z / 2;
             const pGeo = new THREE.SphereGeometry(0.25, 12, 12);
             const pMat = new THREE.MeshPhongMaterial({ color: 0xF5F5DC });
             for (let i = 0; i < size.x; i++) {
                 for (let j = 0; j < size.y; j++) {
                     for (let k = 0; k < size.z; k++) {
-                        const p = new THREE.Mesh(pGeo, pMat); p.position.set((i - hX + 0.5), (j - hY + 0.5), (k - hZ + 0.5));
+                        const p = new THREE.Mesh(pGeo, pMat); 
+                        p.position.set((i - hX + 0.5), (j - hY + 0.5), (k - hZ + 0.5));
                         peanutGroup.add(p);
                     }
                 }
